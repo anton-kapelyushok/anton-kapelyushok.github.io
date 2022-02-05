@@ -1,0 +1,59 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    background: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
+}
+
+canvas {
+    /*border: 1px solid rgba(255, 255, 255, 0.15);*/
+}
+
+.hud {
+    user-select: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.crosshair {
+    position: absolute;
+    left: calc(50% - 2px);
+    top: calc(50% - 2px);
+    width: 4px;
+    height: 4px;
+    background: limegreen;
+    border-radius: 50%;
+    display: none;
+}
+
+.start-hud {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.start-button {
+    height: 50px;
+    width: 200px;
+}
+
+.ingame-hud {
+    position: relative;
+    flex-direction: column;
+    align-items: end;
+    justify-content: right;
+    padding: 20px;
+    font-size: 30px;
+    display: flex;
+}
