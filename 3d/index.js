@@ -38,8 +38,8 @@ const boxSize = 100
 const cubeSize = 10
 
 const scene = new Scene()
-const camera = new PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000)
-camera.position.z = boxSize / 2 * 0.95
+const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
+camera.position.z = boxSize / 2 * 0.9
 const renderer = new WebGLRenderer({canvas, antialias: true})
 renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.shadowMapEnabled = true
@@ -175,7 +175,7 @@ let startTick = 0
 let currentTick = 0
 let lastPlayedTick = 0
 let isPlaying = false
-let highScore = 0
+let highScore = +(localStorage.getItem('record') ?? '0')
 
 const hud = document.querySelector('.hud')
 const startHud = document.querySelector('.start-hud')
@@ -191,7 +191,6 @@ const accuracyIndicator = document.querySelector('.accuracy')
 const highScoreIndicator = document.querySelector('.high-score')
 
 function start() {
-    highScore = +localStorage.getItem('record') ?? '0'
     startHud.style.display = 'none'
     startButton.innerText = 'RESTART'
     restart()
@@ -248,7 +247,7 @@ function render(time) {
     missesIndicator.innerText = `Misses: ${misses}`
     accuracyIndicator.innerText = `Accuracy: ${Math.round(getAccuracy() * 100)}`
     scoreIndicator.innerText = `Score ${Math.round(getScore())}`
-    highScore.innerText = `High score ${Math.round(highScore)}`
+    highScoreIndicator.innerText = `High score ${Math.round(highScore)}`
 
 
     const timeLeft = Math.max(Math.round(maxTime - (lastPlayedTick - startTick) / tps), 0)
@@ -295,14 +294,16 @@ function shoot() {
 }
 
 function positionCube(cube) {
-    if (!cubes.length) {
-        return
-    }
+
     let newPositionIntersects = true
     const {mesh} = cube
     do {
         mesh.position.x = (Math.random() * 2 - 1) * (boxSize - cubeSize) / 2
         mesh.position.y = (Math.random() * 2 - 1) * (boxSize - cubeSize) / 2
+
+        if (!cubes.length) {
+            return
+        }
 
         for (let cube2 of cubes) {
             if (cube2 === cube) {
