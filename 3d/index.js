@@ -35,7 +35,7 @@ canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 const tps = 144
 const boxSize = 100
-const cubeSize = 4
+window.cubeSize = 4
 
 const scene = new Scene()
 const camera = new PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
