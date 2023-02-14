@@ -1,11 +1,11 @@
 <head>
-    <title>🤡 ClowNCaSe conVErTer 🤡</title>
+    <title>ClowNCaSe conVErTer&nbsp;&nbsp;🤡</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤡</text></svg>">
 </head>
 
 <h1>🤡 CLoWncAse coNVErTeR 🤡</h1>
 <p>iNpUt:</p>
 <textarea id="ta_in"></textarea>
-
 <p>
     <button id="button" style="width: 200px; height: 50px; position: center;">gEneRAte!</button>
 </p>
@@ -13,11 +13,13 @@
 <textarea disabled onclick="this.focus();this.select()" id="ta_out"></textarea>
 
 <style>
+
     body {
+        position: relative;
         max-width: 650px;
-        margin: 40px auto;
-        padding: 0 10px;
-        font: 18px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        margin: 0 auto;
+        padding: 40px 10px;
+        font: 18px/1.5 sans-serif;
         color: #444
     }
 
@@ -29,6 +31,7 @@
         body {
             color: #c9d1d9;
             background: #0d1117
+            height: 100vh;
         }
 
         a:link {
@@ -42,19 +45,32 @@
 
     textarea {
         resize: none;
-        height: 300px;
+        height: 200px;
         width: 600px;
         font-size: 18px;
+        font: 18px/1.5 sans-serif;
     }
 </style>
 
 
 <script>
     button.addEventListener('click', () => {
+
+        var balance = 0 
+
+        // probabilty of uppercase latter
+        var probabilities = [1, 0.9, 0.5, 0.3, 0, 0, 0];
+        var middle = Math.floor(probabilities.length / 2);
+
         ta_out.value = ta_in.value.split('').map(c => {
-            if (Math.random() > 0.6) {
+            var currentProbability = probabilities[middle + balance]
+            if (Math.random() < currentProbability) {
+                if (balance < 0) balance = 1;
+                else balance++;
                 return c.toUpperCase();
             } else {
+                if (balance > 0) balance = -1;
+                else balance--;
                 return c.toLowerCase();
             }
         }).join('');
