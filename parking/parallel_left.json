@@ -1,0 +1,142 @@
+[
+  {
+    "type": "start",
+    "posX": 404,
+    "posY": 521,
+    "rotation": 10
+  },
+  {
+    "type": "finish",
+    "posX": 312,
+    "posY": 296.5,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 312,
+    "posY": 180,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 312,
+    "posY": 64,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 314,
+    "posY": 414,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 313,
+    "posY": 530,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 214,
+    "posY": 66,
+    "rotation": 0,
+    "size": 115
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 212,
+    "posY": 184,
+    "rotation": 0,
+    "size": 115
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 216,
+    "posY": 298,
+    "rotation": 0,
+    "size": 115
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 216,
+    "posY": 413,
+    "rotation": 0,
+    "size": 115
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 216,
+    "posY": 530,
+    "rotation": 0,
+    "size": 115
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 508,
+    "posY": 532,
+    "rotation": 0,
+    "size": 115
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 508,
+    "posY": 413,
+    "rotation": 0,
+    "size": 115
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 507,
+    "posY": 297,
+    "rotation": 0,
+    "size": 115
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 507,
+    "posY": 180,
+    "rotation": 0,
+    "size": 115
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 505,
+    "posY": 63,
+    "rotation": 0,
+    "size": 115
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 311,
+    "posY": 210,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 312,
+    "posY": 98,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 315,
+    "posY": 441,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 339,
+    "posY": 540,
+    "rotation": -25
+  }
+]
