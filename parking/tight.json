@@ -1,0 +1,28 @@
+[
+  {
+    "type": "start",
+    "posX": 431,
+    "posY": 404,
+    "rotation": 0
+  },
+  {
+    "type": "finish",
+    "posX": 233,
+    "posY": 281,
+    "width": 57,
+    "height": 114,
+    "rotation": 180
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 432,
+    "posY": 329,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 431,
+    "posY": 485,
+    "rotation": 0
+  }
+]

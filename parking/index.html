@@ -138,6 +138,22 @@
             margin-bottom: 10px;
         }
 
+        #carSelector {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 1000;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 8px;
+            color: #ecf0f1;
+        }
+
+        #carSelector select {
+            width: 200px;
+            margin-bottom: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -151,6 +167,16 @@
         <button class="editor-button" onclick="loadSelectedLevel()">Load Level</button>
     </div>
 
+    <div id="carSelector">
+        <h3 style="margin: 0 0 10px 0; font-size: 16px;">Select Car</h3>
+        <select id="carSelect" onchange="changePlayerCar()">
+            <option value="vwPolo">VW Polo (Compact)</option>
+            <option value="toyotaCamry">Toyota Camry (Sedan)</option>
+            <option value="smartForTwo">Smart ForTwo (Mini)</option>
+            <option value="fordF150">Ford F-150 (Truck)</option>
+        </select>
+    </div>
+
     <div id="editorPanel">
         <h2>Level Editor</h2>
 
@@ -159,6 +185,7 @@
             <select id="objectType">
                 <option value="obstacleSquare">Obstacle Square</option>
                 <option value="obstacleCar">Obstacle Car</option>
+                <option value="parkingSpace">Parking Space (Visual)</option>
                 <option value="start">Start Position</option>
                 <option value="finish">Finish Zone</option>
             </select>
@@ -229,13 +256,79 @@
         let finishPos = null;
         let obstacles = [];
 
-        // Car properties
+        // Car models with real-world dimensions
+        // Scale: 1 pixel = 44mm (derived from VW Polo wheelbase: 2552mm / 58px = 44mm/px)
+
+        // VW Polo (Compact hatchback)
+        // Real: Length 4074mm, Width 1751mm, Wheelbase 2552mm
+        // Front overhang ~875mm, Rear overhang ~645mm
+        const vwPolo = {
+            name: 'VW Polo',
+            width: 40,          // 1751 mm (track width)
+            height: 93,         // 4074 mm total length
+            wheelbase: 58,      // 2552 mm (distance between front and rear axles)
+            rearOffset: 15,     // 645 mm rear overhang (behind rear axle)
+            frontOverhang: 20   // 875 mm front overhang (in front of front axle)
+            // Verification: 15 + 58 + 20 = 93 pixels ✓
+        };
+
+        // Toyota Camry (Mid-size sedan)
+        // Real: Length 4885mm, Width 1840mm, Wheelbase 2825mm
+        // Front overhang ~930mm, Rear overhang ~1130mm
+        const toyotaCamry = {
+            name: 'Toyota Camry',
+            width: 42,          // 1840 mm
+            height: 111,        // 4885 mm total length
+            wheelbase: 64,      // 2825 mm
+            rearOffset: 26,     // 1130 mm rear overhang
+            frontOverhang: 21   // 930 mm front overhang
+            // Verification: 26 + 64 + 21 = 111 pixels ✓
+        };
+
+        // Smart ForTwo (Mini city car)
+        // Real: Length 2695mm, Width 1663mm, Wheelbase 1873mm
+        // Front overhang ~500mm, Rear overhang ~320mm
+        const smartForTwo = {
+            name: 'Smart ForTwo',
+            width: 38,          // 1663 mm
+            height: 61,         // 2695 mm total length
+            wheelbase: 43,      // 1873 mm
+            rearOffset: 7,      // 320 mm rear overhang
+            frontOverhang: 11   // 500 mm front overhang
+            // Verification: 7 + 43 + 11 = 61 pixels ✓
+        };
+
+        // Ford F-150 (Full-size pickup truck)
+        // Real: Length 5890mm, Width 2030mm, Wheelbase 3685mm (SuperCrew)
+        // Front overhang ~990mm, Rear overhang ~1215mm
+        const fordF150 = {
+            name: 'Ford F-150',
+            width: 46,          // 2030 mm
+            height: 134,        // 5890 mm total length
+            wheelbase: 84,      // 3685 mm
+            rearOffset: 28,     // 1215 mm rear overhang
+            frontOverhang: 22   // 990 mm front overhang
+            // Verification: 28 + 84 + 22 = 134 pixels ✓
+        };
+
+        // Available car models
+        const carModels = {
+            vwPolo: vwPolo,
+            toyotaCamry: toyotaCamry,
+            smartForTwo: smartForTwo,
+            fordF150: fordF150
+        };
+
+        // Currently selected car model (for player's car)
+        let selectedCarModel = vwPolo;
+
+        // Car properties (player's car - uses selectedCarModel)
         const car = {
             x: 100,
             y: 100,
-            width: 40,
-            height: 70,
-            wheelbase: 50, // Distance between front and rear axle
+            width: selectedCarModel.width,
+            height: selectedCarModel.height,
+            wheelbase: selectedCarModel.wheelbase,
             angle: 0,
             velocity: 0,
             maxVelocity: 4,
@@ -247,11 +340,13 @@
         };
 
         // Target parking spot
+        // Standard parking space: Width 2.5m, Length 5m
+        // Scale: 1 pixel = 44mm
         const target = {
             x: 600,
             y: 400,
-            width: 50,
-            height: 80,
+            width: 57,      // 2.5m = 2500mm / 44 = 56.8 ≈ 57px
+            height: 114,    // 5.0m = 5000mm / 44 = 113.6 ≈ 114px
             rotation: 0
         };
 
@@ -380,6 +475,20 @@
             }
         });
 
+        function changePlayerCar() {
+            const select = document.getElementById('carSelect');
+            const selectedKey = select.value;
+            selectedCarModel = carModels[selectedKey];
+
+            // Update car dimensions
+            car.width = selectedCarModel.width;
+            car.height = selectedCarModel.height;
+            car.wheelbase = selectedCarModel.wheelbase;
+
+            // Reset the game with new car dimensions
+            resetGame();
+        }
+
         function resetGame() {
             car.x = startPos.posX;
             car.y = startPos.posY;
@@ -399,8 +508,8 @@
 
         function getWheelPositions() {
             const wheelOffset = 10;
-            const rearOffset = 10;
-            const frontAxleY = -car.wheelbase + rearOffset;
+            const rearOffset = selectedCarModel.rearOffset;
+            const frontAxleY = -car.wheelbase; // Wheelbase is measured between axles
 
             // Calculate wheel positions in local coordinates
             const localWheels = {
@@ -605,9 +714,9 @@
             let localCorners;
             if (obstacle.type === 'obstacleCar') {
                 // Car obstacle corners (same as car shape)
-                const carWidth = 40;
-                const carHeight = 70;
-                const rearOffset = 10;
+                const carWidth = vwPolo.width;
+                const carHeight = vwPolo.height;
+                const rearOffset = vwPolo.rearOffset;
 
                 localCorners = [
                     { x: -carWidth / 2, y: rearOffset },
@@ -693,7 +802,7 @@
 
             // Car position (x,y) is at rear axle center
             // Front of car is in negative Y direction (direction of travel)
-            const rearOffset = 10; // Small offset behind rear axle
+            const rearOffset = selectedCarModel.rearOffset; // Rear overhang behind rear axle
 
             // Calculate corners relative to rear axle (car position)
             const localCorners = [
@@ -731,6 +840,45 @@
                 ctx.stroke();
             }
             ctx.setLineDash([]);
+        }
+
+        function drawParkingSpaces() {
+            // Draw visual parking space markers (no collision)
+            const parkingSpaces = level.filter(item => item.type === 'parkingSpace');
+
+            parkingSpaces.forEach(space => {
+                ctx.save();
+                ctx.translate(space.posX, space.posY);
+                ctx.rotate(space.rotation * Math.PI / 180);
+
+                // Draw white outline
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-space.width / 2, -space.height / 2, space.width, space.height);
+
+                // Draw diagonal corner markers
+                const cornerSize = 10;
+                ctx.beginPath();
+                // Top-left corner
+                ctx.moveTo(-space.width / 2, -space.height / 2 + cornerSize);
+                ctx.lineTo(-space.width / 2, -space.height / 2);
+                ctx.lineTo(-space.width / 2 + cornerSize, -space.height / 2);
+                // Top-right corner
+                ctx.moveTo(space.width / 2 - cornerSize, -space.height / 2);
+                ctx.lineTo(space.width / 2, -space.height / 2);
+                ctx.lineTo(space.width / 2, -space.height / 2 + cornerSize);
+                // Bottom-right corner
+                ctx.moveTo(space.width / 2, space.height / 2 - cornerSize);
+                ctx.lineTo(space.width / 2, space.height / 2);
+                ctx.lineTo(space.width / 2 - cornerSize, space.height / 2);
+                // Bottom-left corner
+                ctx.moveTo(-space.width / 2 + cornerSize, space.height / 2);
+                ctx.lineTo(-space.width / 2, space.height / 2);
+                ctx.lineTo(-space.width / 2, space.height / 2 - cornerSize);
+                ctx.stroke();
+
+                ctx.restore();
+            });
         }
 
         function drawParkingTarget() {
@@ -827,10 +975,10 @@
             ctx.translate(start.posX, start.posY);
             ctx.rotate(start.rotation * Math.PI / 180);
 
-            // Draw a simple car-like shape for start position
-            const width = 40;
-            const height = 70;
-            const rearOffset = 10;
+            // Draw a simple car-like shape for start position (uses player's selected car)
+            const width = selectedCarModel.width;
+            const height = selectedCarModel.height;
+            const rearOffset = selectedCarModel.rearOffset;
 
             ctx.fillStyle = 'rgba(46, 204, 113, 0.5)';
             ctx.fillRect(-width / 2, -height + rearOffset, width, height);
@@ -856,9 +1004,9 @@
             currentObstacles.forEach(obstacle => {
                 if (obstacle.type === 'obstacleCar') {
                     // Draw car obstacle
-                    const carWidth = 40;
-                    const carHeight = 70;
-                    const rearOffset = 10;
+                    const carWidth = vwPolo.width;
+                    const carHeight = vwPolo.height;
+                    const rearOffset = vwPolo.rearOffset;
 
                     ctx.save();
                     ctx.translate(obstacle.posX, obstacle.posY);
@@ -969,7 +1117,7 @@
             ctx.translate(car.x, car.y);
             ctx.rotate(car.angle);
 
-            const rearOffset = 10;
+            const rearOffset = selectedCarModel.rearOffset;
 
             // Car body (most of car is in front of rear axle)
             ctx.fillStyle = parked ? '#f39c12' : '#e74c3c';
@@ -990,7 +1138,7 @@
             const wheelOffset = 10;
 
             // Front wheels (with steering)
-            const frontAxleY = -car.wheelbase + rearOffset;
+            const frontAxleY = -car.wheelbase; // Wheelbase is measured between axles
             drawWheel(-car.width / 2 + wheelOffset, frontAxleY, -car.steeringAngle, '#ff0000', wheelWidth, wheelHeight);
             drawWheel(car.width / 2 - wheelOffset, frontAxleY, -car.steeringAngle, '#0000ff', wheelWidth, wheelHeight);
 
@@ -1072,13 +1220,14 @@
             // Speed and steering display
             ctx.fillStyle = 'white';
             ctx.font = '14px Arial';
-            ctx.fillText(`Speed: ${Math.abs(car.velocity).toFixed(2)}`, 10, 20);
+            ctx.fillText(`Car: ${selectedCarModel.name}`, 10, 20);
+            ctx.fillText(`Speed: ${Math.abs(car.velocity).toFixed(2)}`, 10, 40);
             const steeringDegrees = (car.steeringAngle * 180 / Math.PI).toFixed(1);
-            ctx.fillText(`Steering: ${steeringDegrees}°`, 10, 40);
+            ctx.fillText(`Steering: ${steeringDegrees}°`, 10, 60);
 
             // Trajectory legend
             const legendX = canvas.width - 150;
-            const legendY = 20;
+            const legendY = 10;
             ctx.font = '12px Arial';
             ctx.fillStyle = 'white';
             ctx.fillText('Wheel Trajectories:', legendX, legendY);
@@ -1137,6 +1286,7 @@
 
         function draw() {
             drawBackground();
+            drawParkingSpaces();
             drawObstacles();
             drawParkingTarget();
             drawStartPosition();
@@ -1208,9 +1358,9 @@
                         hit = pointInRotatedRect({x, y}, obj.posX, obj.posY, obj.size, obj.size, obj.rotation * Math.PI / 180);
                     } else if (obj.type === 'obstacleCar') {
                         // Car obstacle hitbox
-                        const w = 40;
-                        const h = 70;
-                        const rearOffset = 10;
+                        const w = vwPolo.width;
+                        const h = vwPolo.height;
+                        const rearOffset = vwPolo.rearOffset;
                         const angle = obj.rotation * Math.PI / 180;
 
                         const dx = x - obj.posX;
@@ -1221,10 +1371,10 @@
                         hit = localX >= -w / 2 && localX <= w / 2 &&
                               localY >= -h + rearOffset && localY <= rearOffset;
                     } else if (obj.type === 'start') {
-                        // Start position uses rear offset - transform point to local space and check bounds
-                        const w = 40;
-                        const h = 70;
-                        const rearOffset = 10;
+                        // Start position uses rear offset - transform point to local space and check bounds (uses player's car)
+                        const w = selectedCarModel.width;
+                        const h = selectedCarModel.height;
+                        const rearOffset = selectedCarModel.rearOffset;
                         const angle = obj.rotation * Math.PI / 180;
 
                         // Transform click point to object's local coordinate system
@@ -1236,9 +1386,9 @@
                         // Check if point is inside the rectangle (drawn from -w/2, -h+rearOffset)
                         hit = localX >= -w / 2 && localX <= w / 2 &&
                               localY >= -h + rearOffset && localY <= rearOffset;
-                    } else if (obj.type === 'finish') {
-                        const w = obj.width || 50;
-                        const h = obj.height || 80;
+                    } else if (obj.type === 'finish' || obj.type === 'parkingSpace') {
+                        const w = obj.width || 57;
+                        const h = obj.height || 114;
                         hit = pointInRotatedRect({x, y}, obj.posX, obj.posY, w, h, obj.rotation * Math.PI / 180);
                     }
 
@@ -1407,9 +1557,14 @@
                 newObj.size = 50;
             } else if (type === 'obstacleCar') {
                 // Car obstacles don't need extra properties
+            } else if (type === 'parkingSpace') {
+                // Visual parking space marker: 2.5m × 5m (no collision)
+                newObj.width = 57;   // 2.5m
+                newObj.height = 114; // 5.0m
             } else if (type === 'finish') {
-                newObj.width = 50;
-                newObj.height = 80;
+                // Standard parking space: 2.5m × 5m
+                newObj.width = 57;   // 2.5m
+                newObj.height = 114; // 5.0m
             }
 
             // Remove existing start/finish if adding new one
@@ -1475,16 +1630,23 @@
 
                     let w, h, offsetX = 0, offsetY = 0;
 
-                    if (obj.type === 'start' || obj.type === 'obstacleCar') {
-                        // Start position and car obstacle use rear offset
-                        w = 40;
-                        h = 70;
-                        const rearOffset = 10;
+                    if (obj.type === 'start') {
+                        // Start position uses player's selected car
+                        w = selectedCarModel.width;
+                        h = selectedCarModel.height;
+                        const rearOffset = selectedCarModel.rearOffset;
                         offsetX = -w / 2;
                         offsetY = -h + rearOffset;
-                    } else if (obj.type === 'finish') {
-                        w = obj.width || 50;
-                        h = obj.height || 80;
+                    } else if (obj.type === 'obstacleCar') {
+                        // Obstacle cars use VW Polo
+                        w = vwPolo.width;
+                        h = vwPolo.height;
+                        const rearOffset = vwPolo.rearOffset;
+                        offsetX = -w / 2;
+                        offsetY = -h + rearOffset;
+                    } else if (obj.type === 'finish' || obj.type === 'parkingSpace') {
+                        w = obj.width || 57;
+                        h = obj.height || 114;
                         offsetX = -w / 2;
                         offsetY = -h / 2;
                     } else if (obj.type === 'obstacleSquare') {

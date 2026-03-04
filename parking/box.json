@@ -7,114 +7,414 @@
   },
   {
     "type": "finish",
-    "posX": 474,
-    "posY": 339.5,
-    "width": 50,
-    "height": 80,
+    "posX": 498,
+    "posY": 350,
+    "width": 57,
+    "height": 114,
     "rotation": 0
   },
   {
-    "type": "obstacleCar",
-    "posX": 419,
-    "posY": 363.5,
-    "rotation": 0
+    "type": "parkingSpace",
+    "posX": 437,
+    "posY": 349,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
   },
   {
-    "type": "obstacleCar",
-    "posX": 369,
-    "posY": 363.5,
-    "rotation": 0
+    "type": "parkingSpace",
+    "posX": 377,
+    "posY": 349,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
   },
   {
-    "type": "obstacleCar",
-    "posX": 322,
-    "posY": 362.5,
-    "rotation": 0
+    "type": "parkingSpace",
+    "posX": 558,
+    "posY": 350,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
   },
   {
-    "type": "obstacleCar",
-    "posX": 529,
-    "posY": 363.5,
-    "rotation": 0
+    "type": "parkingSpace",
+    "posX": 618,
+    "posY": 350,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
   },
   {
-    "type": "obstacleCar",
-    "posX": 580,
-    "posY": 362.5,
-    "rotation": 0
+    "type": "parkingSpace",
+    "posX": 679,
+    "posY": 350,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
   },
   {
-    "type": "obstacleCar",
-    "posX": 582,
-    "posY": 146.5,
-    "rotation": 180
+    "type": "parkingSpace",
+    "posX": 739,
+    "posY": 351,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
   },
   {
-    "type": "obstacleCar",
-    "posX": 528,
-    "posY": 150.5,
-    "rotation": 180
+    "type": "parkingSpace",
+    "posX": 317,
+    "posY": 348,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
   },
   {
-    "type": "obstacleCar",
-    "posX": 474,
-    "posY": 149.5,
-    "rotation": 180
+    "type": "parkingSpace",
+    "posX": 735,
+    "posY": 121,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
   },
   {
-    "type": "obstacleCar",
-    "posX": 418,
-    "posY": 148.5,
-    "rotation": 180
+    "type": "parkingSpace",
+    "posX": 677,
+    "posY": 121,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
   },
   {
-    "type": "obstacleCar",
-    "posX": 370,
-    "posY": 150.5,
-    "rotation": 180
+    "type": "parkingSpace",
+    "posX": 620,
+    "posY": 122,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
   },
   {
-    "type": "obstacleCar",
-    "posX": 319,
-    "posY": 150.5,
-    "rotation": 180
+    "type": "parkingSpace",
+    "posX": 561,
+    "posY": 121,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
   },
   {
-    "type": "obstacleSquare",
+    "type": "parkingSpace",
+    "posX": 501,
+    "posY": 121,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
     "posX": 442,
-    "posY": 403.5,
+    "posY": 121,
     "rotation": 0,
-    "size": 50
+    "width": 57,
+    "height": 114
   },
   {
-    "type": "obstacleSquare",
-    "posX": 502,
-    "posY": 404.5,
+    "type": "parkingSpace",
+    "posX": 383,
+    "posY": 120,
     "rotation": 0,
-    "size": 50
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 323,
+    "posY": 119,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
   },
   {
     "type": "obstacleCar",
-    "posX": 629,
-    "posY": 362,
-    "rotation": 0
+    "posX": 323,
+    "posY": 146,
+    "rotation": -5
   },
   {
     "type": "obstacleCar",
-    "posX": 682,
-    "posY": 361,
-    "rotation": 0
+    "posX": 445,
+    "posY": 147,
+    "rotation": 5
   },
   {
     "type": "obstacleCar",
-    "posX": 631,
+    "posX": 508,
     "posY": 149,
-    "rotation": 180
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 563,
+    "posY": 147,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 636,
+    "posY": 149,
+    "rotation": 25
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 736,
+    "posY": 153,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 321,
+    "posY": 376,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 385,
+    "posY": 377,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 448,
+    "posY": 383,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 558,
+    "posY": 382,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 614,
+    "posY": 373,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 674,
+    "posY": 379,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 735,
+    "posY": 380,
+    "rotation": 5
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 741,
+    "posY": 465,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 681,
+    "posY": 466,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 621,
+    "posY": 465,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 560,
+    "posY": 466,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 497,
+    "posY": 466,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 440,
+    "posY": 465,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 381,
+    "posY": 465,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 322,
+    "posY": 465,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 380,
+    "posY": 487,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 447,
+    "posY": 487,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 499,
+    "posY": 488,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 573,
+    "posY": 487,
+    "rotation": -10
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 626,
+    "posY": 498,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 717,
+    "posY": 497,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 382,
+    "posY": 104,
+    "rotation": 5
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 381,
+    "posY": 6,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 323,
+    "posY": 6,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 442,
+    "posY": 8,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 499,
+    "posY": 8,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 559,
+    "posY": 8,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 620,
+    "posY": 8,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 678,
+    "posY": 7,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 735,
+    "posY": 7,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
   },
   {
     "type": "obstacleCar",
     "posX": 679,
-    "posY": 148,
-    "rotation": 180
+    "posY": 40,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 561,
+    "posY": 41,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 501,
+    "posY": 40,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 325,
+    "posY": 41,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 444,
+    "posY": 43,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 326,
+    "posY": 491,
+    "rotation": 0
   }
 ]
