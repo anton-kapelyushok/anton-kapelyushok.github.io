@@ -1,0 +1,890 @@
+[
+  {
+    "type": "start",
+    "posX": 306,
+    "posY": 317,
+    "rotation": 180
+  },
+  {
+    "type": "finish",
+    "posX": 699,
+    "posY": 419,
+    "width": 57,
+    "height": 114,
+    "rotation": 0
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 363,
+    "posY": 349,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 423,
+    "posY": 349,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 242,
+    "posY": 350,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 182,
+    "posY": 350,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 121,
+    "posY": 350,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 61,
+    "posY": 351,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 483,
+    "posY": 348,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 65,
+    "posY": 121,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 123,
+    "posY": 121,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 180,
+    "posY": 122,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 239,
+    "posY": 121,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 299,
+    "posY": 121,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 358,
+    "posY": 121,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 417,
+    "posY": 120,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 477,
+    "posY": 119,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 477,
+    "posY": 146,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 355,
+    "posY": 147,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 292,
+    "posY": 149,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 237,
+    "posY": 147,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 164,
+    "posY": 149,
+    "rotation": -25
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 64,
+    "posY": 153,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 479,
+    "posY": 376,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 415,
+    "posY": 377,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 361,
+    "posY": 381,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 237,
+    "posY": 380,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 186,
+    "posY": 373,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 126,
+    "posY": 379,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 65,
+    "posY": 380,
+    "rotation": -5
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 59,
+    "posY": 465,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 119,
+    "posY": 466,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 179,
+    "posY": 465,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 240,
+    "posY": 466,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 303,
+    "posY": 466,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 360,
+    "posY": 465,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 419,
+    "posY": 465,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 478,
+    "posY": 465,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 420,
+    "posY": 487,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 353,
+    "posY": 487,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 301,
+    "posY": 488,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 227,
+    "posY": 487,
+    "rotation": 10
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 174,
+    "posY": 498,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 83,
+    "posY": 497,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 418,
+    "posY": 104,
+    "rotation": -5
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 419,
+    "posY": 6,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 477,
+    "posY": 6,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 358,
+    "posY": 8,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 301,
+    "posY": 8,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 241,
+    "posY": 8,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 180,
+    "posY": 8,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 122,
+    "posY": 7,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 65,
+    "posY": 7,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 121,
+    "posY": 40,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 239,
+    "posY": 41,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 299,
+    "posY": 40,
+    "rotation": 5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 475,
+    "posY": 41,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 356,
+    "posY": 43,
+    "rotation": -5
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 474,
+    "posY": 491,
+    "rotation": 0
+  },
+  {
+    "type": "parkingSpace",
+    "posX": 302,
+    "posY": 350,
+    "rotation": 0,
+    "width": 57,
+    "height": 114
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 629,
+    "posY": 207,
+    "rotation": 0,
+    "size": 50
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 629,
+    "posY": 258,
+    "rotation": 0,
+    "size": 50
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 577,
+    "posY": 310,
+    "rotation": 0,
+    "size": 50
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 629,
+    "posY": 310,
+    "rotation": 0,
+    "size": 50
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 502,
+    "posY": 163,
+    "rotation": 90,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 513,
+    "posY": 112,
+    "rotation": 115,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 546,
+    "posY": 68,
+    "rotation": 140,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 594,
+    "posY": 41,
+    "rotation": 165,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 621,
+    "posY": 36,
+    "rotation": 175,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 677,
+    "posY": 44,
+    "rotation": 205,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 723,
+    "posY": 73,
+    "rotation": 225,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 751,
+    "posY": 116,
+    "rotation": 245,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 757,
+    "posY": 160,
+    "rotation": 270,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 505,
+    "posY": 138,
+    "rotation": 100,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 527,
+    "posY": 88,
+    "rotation": 130,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 569,
+    "posY": 52,
+    "rotation": 150,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 650,
+    "posY": 36,
+    "rotation": 190,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 702,
+    "posY": 56,
+    "rotation": 210,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 740,
+    "posY": 96,
+    "rotation": 240,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 756,
+    "posY": 138,
+    "rotation": 265,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 526,
+    "posY": 310,
+    "rotation": 0,
+    "size": 50
+  },
+  {
+    "type": "guidingCircle",
+    "posX": 630,
+    "posY": 160,
+    "rotation": 0,
+    "radius": 115
+  },
+  {
+    "type": "guidingCircle",
+    "posX": 629,
+    "posY": 153,
+    "rotation": 0,
+    "radius": 35
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 616,
+    "posY": 167,
+    "rotation": 270,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 641,
+    "posY": 167,
+    "rotation": 270,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 616,
+    "posY": 143,
+    "rotation": 270,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 641,
+    "posY": 143,
+    "rotation": 270,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 611,
+    "posY": 131,
+    "rotation": 235,
+    "size": 10
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 628,
+    "posY": 125,
+    "rotation": 270,
+    "size": 10
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 643,
+    "posY": 129,
+    "rotation": 295,
+    "size": 10
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 636,
+    "posY": 126,
+    "rotation": 280,
+    "size": 10
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 647,
+    "posY": 132,
+    "rotation": 295,
+    "size": 10
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 618,
+    "posY": 127,
+    "rotation": 250,
+    "size": 10
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 642,
+    "posY": 129,
+    "rotation": 290,
+    "size": 10
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 757,
+    "posY": 186,
+    "rotation": 270,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 757,
+    "posY": 212,
+    "rotation": 270,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 757,
+    "posY": 240,
+    "rotation": 270,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 757,
+    "posY": 267,
+    "rotation": 270,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 757,
+    "posY": 293,
+    "rotation": 270,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 757,
+    "posY": 320,
+    "rotation": 270,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 736,
+    "posY": 88,
+    "rotation": 230,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 694,
+    "posY": 51,
+    "rotation": 200,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 715,
+    "posY": 62,
+    "rotation": 220,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 663,
+    "posY": 38,
+    "rotation": 195,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 635,
+    "posY": 34,
+    "rotation": 180,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 607,
+    "posY": 37,
+    "rotation": 170,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 585,
+    "posY": 43,
+    "rotation": 155,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 557,
+    "posY": 58,
+    "rotation": 145,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 533,
+    "posY": 78,
+    "rotation": 135,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 517,
+    "posY": 100,
+    "rotation": 120,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 506,
+    "posY": 127,
+    "rotation": 110,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 501,
+    "posY": 148,
+    "rotation": 100,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 499,
+    "posY": 163,
+    "rotation": 90,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 511,
+    "posY": 113,
+    "rotation": 110,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 522,
+    "posY": 90,
+    "rotation": 120,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 542,
+    "posY": 68,
+    "rotation": 140,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 569,
+    "posY": 50,
+    "rotation": 150,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 618,
+    "posY": 34,
+    "rotation": 175,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 649,
+    "posY": 34,
+    "rotation": 190,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 685,
+    "posY": 44,
+    "rotation": 200,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 696,
+    "posY": 50,
+    "rotation": 210,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 727,
+    "posY": 72,
+    "rotation": 225,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 735,
+    "posY": 83,
+    "rotation": 230,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 746,
+    "posY": 104,
+    "rotation": 240,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 753,
+    "posY": 123,
+    "rotation": 255,
+    "size": 25
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 532,
+    "posY": 76,
+    "rotation": 135,
+    "size": 25
+  }
+]
