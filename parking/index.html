@@ -186,6 +186,7 @@
                 <option value="obstacleSquare">Obstacle Square</option>
                 <option value="obstacleCar">Obstacle Car</option>
                 <option value="parkingSpace">Parking Space (Visual)</option>
+                <option value="guidingCircle">Guiding Circle (Visual)</option>
                 <option value="start">Start Position</option>
                 <option value="finish">Finish Zone</option>
             </select>
@@ -200,7 +201,7 @@
                 • Q/E to rotate selected<br>
                 • C to copy selected<br>
                 • D or Del to delete selected<br>
-                • +/- to resize obstacles
+                • +/- to resize obstacles/circles
             </p>
         </div>
 
@@ -246,6 +247,7 @@
             'parallel_right': { name: 'Parallel Right', file: 'parallel_right.json' },
             'parallel_left': { name: 'Parallel Left', file: 'parallel_left.json' },
             'kerstboom': { name: 'Kerstboom', file: 'kerstboom.json' },
+            'sanechek_parking': { name: 'Sanechek Parking', file: 'sanechek_parking.json' },
         };
 
         // Current level
@@ -379,7 +381,7 @@
             rearLeft: [],
             rearRight: []
         };
-        const maxTrajectoryLength = 150; // Number of points to keep
+        const maxTrajectoryLength = 150_000; // Number of points to keep
         const trajectoryInterval = 2; // Add point every N frames
         let frameCount = 0;
 
@@ -883,6 +885,44 @@
             });
         }
 
+        function drawGuidingCircles() {
+            // Draw visual guiding circles (no collision)
+            const guidingCircles = level.filter(item => item.type === 'guidingCircle');
+
+            guidingCircles.forEach(circle => {
+                const radius = circle.radius || 50;
+
+                ctx.save();
+
+                // Draw the circle
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.arc(circle.posX, circle.posY, radius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Draw the center point
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.beginPath();
+                ctx.arc(circle.posX, circle.posY, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw crosshair at center
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(circle.posX - 8, circle.posY);
+                ctx.lineTo(circle.posX + 8, circle.posY);
+                ctx.moveTo(circle.posX, circle.posY - 8);
+                ctx.lineTo(circle.posX, circle.posY + 8);
+                ctx.stroke();
+
+                ctx.restore();
+            });
+        }
+
         function drawParkingTarget() {
             // Get finish position from level array (important for editor)
             const finish = level.find(item => item.type === 'finish');
@@ -1289,6 +1329,7 @@
         function draw() {
             drawBackground();
             drawParkingSpaces();
+            drawGuidingCircles();
             drawObstacles();
             drawParkingTarget();
             drawStartPosition();
@@ -1351,9 +1392,18 @@
 
                 selectedObject = null;
 
-                // Check click on objects
+                // Priority-based object selection
+                // High priority: obstacleSquare, obstacleCar, start
+                // Low priority: guidingCircle, parkingSpace, finish
+
+                const highPriorityTypes = ['obstacleSquare', 'obstacleCar', 'start'];
+                const lowPriorityTypes = ['guidingCircle', 'parkingSpace', 'finish'];
+
+                // Check high priority objects first
                 for (let i = level.length - 1; i >= 0; i--) {
                     const obj = level[i];
+                    if (!highPriorityTypes.includes(obj.type)) continue;
+
                     let hit = false;
 
                     if (obj.type === 'obstacleSquare') {
@@ -1388,16 +1438,41 @@
                         // Check if point is inside the rectangle (drawn from -w/2, -h+rearOffset)
                         hit = localX >= -w / 2 && localX <= w / 2 &&
                               localY >= -h + rearOffset && localY <= rearOffset;
-                    } else if (obj.type === 'finish' || obj.type === 'parkingSpace') {
-                        const w = obj.width || 57;
-                        const h = obj.height || 114;
-                        hit = pointInRotatedRect({x, y}, obj.posX, obj.posY, w, h, obj.rotation * Math.PI / 180);
                     }
 
                     if (hit) {
                         selectedObject = i;
                         isDragging = true;
                         break;
+                    }
+                }
+
+                // If no high priority object was hit, check low priority objects
+                if (selectedObject === null) {
+                    for (let i = level.length - 1; i >= 0; i--) {
+                        const obj = level[i];
+                        if (!lowPriorityTypes.includes(obj.type)) continue;
+
+                        let hit = false;
+
+                        if (obj.type === 'guidingCircle') {
+                            // Circle hitbox - check if click is within radius
+                            const radius = obj.radius || 50;
+                            const dx = x - obj.posX;
+                            const dy = y - obj.posY;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            hit = distance <= radius;
+                        } else if (obj.type === 'finish' || obj.type === 'parkingSpace') {
+                            const w = obj.width || 57;
+                            const h = obj.height || 114;
+                            hit = pointInRotatedRect({x, y}, obj.posX, obj.posY, w, h, obj.rotation * Math.PI / 180);
+                        }
+
+                        if (hit) {
+                            selectedObject = i;
+                            isDragging = true;
+                            break;
+                        }
                     }
                 }
             });
@@ -1563,6 +1638,9 @@
                 // Visual parking space marker: 2.5m × 5m (no collision)
                 newObj.width = 57;   // 2.5m
                 newObj.height = 114; // 5.0m
+            } else if (type === 'guidingCircle') {
+                // Visual guiding circle (no collision)
+                newObj.radius = 50;
             } else if (type === 'finish') {
                 // Standard parking space: 2.5m × 5m
                 newObj.width = 57;   // 2.5m
@@ -1626,45 +1704,57 @@
             if (editorMode && selectedObject !== null) {
                 const obj = level[selectedObject];
                 if (obj) {
-                    ctx.save();
-                    ctx.translate(obj.posX, obj.posY);
-                    ctx.rotate(obj.rotation * Math.PI / 180);
+                    if (obj.type === 'guidingCircle') {
+                        // Draw circle outline for guiding circle
+                        const radius = obj.radius || 50;
+                        ctx.strokeStyle = 'yellow';
+                        ctx.lineWidth = 3;
+                        ctx.setLineDash([5, 5]);
+                        ctx.beginPath();
+                        ctx.arc(obj.posX, obj.posY, radius, 0, Math.PI * 2);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    } else {
+                        ctx.save();
+                        ctx.translate(obj.posX, obj.posY);
+                        ctx.rotate(obj.rotation * Math.PI / 180);
 
-                    let w, h, offsetX = 0, offsetY = 0;
+                        let w, h, offsetX = 0, offsetY = 0;
 
-                    if (obj.type === 'start') {
-                        // Start position uses player's selected car
-                        w = selectedCarModel.width;
-                        h = selectedCarModel.height;
-                        const rearOffset = selectedCarModel.rearOffset;
-                        offsetX = -w / 2;
-                        offsetY = -h + rearOffset;
-                    } else if (obj.type === 'obstacleCar') {
-                        // Obstacle cars use VW Polo
-                        w = vwPolo.width;
-                        h = vwPolo.height;
-                        const rearOffset = vwPolo.rearOffset;
-                        offsetX = -w / 2;
-                        offsetY = -h + rearOffset;
-                    } else if (obj.type === 'finish' || obj.type === 'parkingSpace') {
-                        w = obj.width || 57;
-                        h = obj.height || 114;
-                        offsetX = -w / 2;
-                        offsetY = -h / 2;
-                    } else if (obj.type === 'obstacleSquare') {
-                        w = obj.size;
-                        h = obj.size;
-                        offsetX = -w / 2;
-                        offsetY = -h / 2;
+                        if (obj.type === 'start') {
+                            // Start position uses player's selected car
+                            w = selectedCarModel.width;
+                            h = selectedCarModel.height;
+                            const rearOffset = selectedCarModel.rearOffset;
+                            offsetX = -w / 2;
+                            offsetY = -h + rearOffset;
+                        } else if (obj.type === 'obstacleCar') {
+                            // Obstacle cars use VW Polo
+                            w = vwPolo.width;
+                            h = vwPolo.height;
+                            const rearOffset = vwPolo.rearOffset;
+                            offsetX = -w / 2;
+                            offsetY = -h + rearOffset;
+                        } else if (obj.type === 'finish' || obj.type === 'parkingSpace') {
+                            w = obj.width || 57;
+                            h = obj.height || 114;
+                            offsetX = -w / 2;
+                            offsetY = -h / 2;
+                        } else if (obj.type === 'obstacleSquare') {
+                            w = obj.size;
+                            h = obj.size;
+                            offsetX = -w / 2;
+                            offsetY = -h / 2;
+                        }
+
+                        ctx.strokeStyle = 'yellow';
+                        ctx.lineWidth = 3;
+                        ctx.setLineDash([5, 5]);
+                        ctx.strokeRect(offsetX, offsetY, w, h);
+                        ctx.setLineDash([]);
+
+                        ctx.restore();
                     }
-
-                    ctx.strokeStyle = 'yellow';
-                    ctx.lineWidth = 3;
-                    ctx.setLineDash([5, 5]);
-                    ctx.strokeRect(offsetX, offsetY, w, h);
-                    ctx.setLineDash([]);
-
-                    ctx.restore();
                 }
             }
 
@@ -1694,10 +1784,16 @@
                 obj.posX += moveSpeed;
             } else if (e.key === 'q' || e.key === 'Q') {
                 e.preventDefault();
-                obj.rotation = (obj.rotation - 5) % 360;
+                // Don't rotate guiding circles (they're circular, rotation doesn't matter)
+                if (obj.type !== 'guidingCircle') {
+                    obj.rotation = (obj.rotation - 5) % 360;
+                }
             } else if (e.key === 'e' || e.key === 'E') {
                 e.preventDefault();
-                obj.rotation = (obj.rotation + 5) % 360;
+                // Don't rotate guiding circles (they're circular, rotation doesn't matter)
+                if (obj.type !== 'guidingCircle') {
+                    obj.rotation = (obj.rotation + 5) % 360;
+                }
             } else if (e.key === 'c' || e.key === 'C') {
                 e.preventDefault();
                 // Copy the selected object
@@ -1713,14 +1809,22 @@
                 selectedObject = null;
             } else if (e.key === '+' || e.key === '=') {
                 e.preventDefault();
-                if (obj.size) obj.size += 5;
-                if (obj.width) obj.width += 5;
-                if (obj.height) obj.height += 5;
+                if (obj.size !== undefined) obj.size += 5;
+                if (obj.width !== undefined) obj.width += 5;
+                if (obj.height !== undefined) obj.height += 5;
+                if (obj.radius !== undefined) {
+                    obj.radius += 5;
+                    console.log('Increased radius to:', obj.radius);
+                }
             } else if (e.key === '-' || e.key === '_') {
                 e.preventDefault();
-                if (obj.size) obj.size = Math.max(10, obj.size - 5);
-                if (obj.width) obj.width = Math.max(10, obj.width - 5);
-                if (obj.height) obj.height = Math.max(10, obj.height - 5);
+                if (obj.size !== undefined) obj.size = Math.max(10, obj.size - 5);
+                if (obj.width !== undefined) obj.width = Math.max(10, obj.width - 5);
+                if (obj.height !== undefined) obj.height = Math.max(10, obj.height - 5);
+                if (obj.radius !== undefined) {
+                    obj.radius = Math.max(10, obj.radius - 5);
+                    console.log('Decreased radius to:', obj.radius);
+                }
             }
         });
 
