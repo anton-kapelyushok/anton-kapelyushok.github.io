@@ -1,8 +1,8 @@
 [
   {
     "type": "start",
-    "posX": 416,
-    "posY": 519.5,
+    "posX": 396,
+    "posY": 521,
     "rotation": -10
   },
   {
@@ -47,36 +47,36 @@
   },
   {
     "type": "obstacleSquare",
-    "posX": 576,
-    "posY": 65,
+    "posX": 586,
+    "posY": 66,
     "rotation": 0,
     "size": 115
   },
   {
     "type": "obstacleSquare",
-    "posX": 575,
-    "posY": 180,
+    "posX": 588,
+    "posY": 184,
     "rotation": 0,
     "size": 115
   },
   {
     "type": "obstacleSquare",
-    "posX": 576,
-    "posY": 299,
+    "posX": 584,
+    "posY": 298,
     "rotation": 0,
     "size": 115
   },
   {
     "type": "obstacleSquare",
-    "posX": 577,
-    "posY": 417,
+    "posX": 584,
+    "posY": 413,
     "rotation": 0,
     "size": 115
   },
   {
     "type": "obstacleSquare",
-    "posX": 577,
-    "posY": 532,
+    "posX": 584,
+    "posY": 530,
     "rotation": 0,
     "size": 115
   },
@@ -117,9 +117,9 @@
   },
   {
     "type": "obstacleCar",
-    "posX": 493,
-    "posY": 204,
-    "rotation": -5
+    "posX": 489,
+    "posY": 210,
+    "rotation": 0
   },
   {
     "type": "obstacleCar",
@@ -129,8 +129,8 @@
   },
   {
     "type": "obstacleCar",
-    "posX": 479,
-    "posY": 433,
+    "posX": 485,
+    "posY": 441,
     "rotation": 5
   },
   {

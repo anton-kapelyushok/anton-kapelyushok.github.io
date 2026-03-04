@@ -183,14 +183,14 @@
   },
   {
     "type": "obstacleCar",
-    "posX": 448,
-    "posY": 383,
+    "posX": 439,
+    "posY": 381,
     "rotation": 0
   },
   {
     "type": "obstacleCar",
-    "posX": 558,
-    "posY": 382,
+    "posX": 563,
+    "posY": 380,
     "rotation": -5
   },
   {
