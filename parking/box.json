@@ -33,18 +33,6 @@
   },
   {
     "type": "obstacleCar",
-    "posX": 617,
-    "posY": 281.5,
-    "rotation": 90
-  },
-  {
-    "type": "obstacleCar",
-    "posX": 666,
-    "posY": 231.5,
-    "rotation": -90
-  },
-  {
-    "type": "obstacleCar",
     "posX": 529,
     "posY": 363.5,
     "rotation": 0
@@ -104,5 +92,29 @@
     "posY": 404.5,
     "rotation": 0,
     "size": 50
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 629,
+    "posY": 362,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 682,
+    "posY": 361,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 631,
+    "posY": 149,
+    "rotation": 180
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 679,
+    "posY": 148,
+    "rotation": 180
   }
 ]
