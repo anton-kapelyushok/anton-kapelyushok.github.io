@@ -174,6 +174,7 @@
             <option value="toyotaCamry">Toyota Camry (Sedan)</option>
             <option value="smartForTwo">Smart ForTwo (Mini)</option>
             <option value="fordF150">Ford F-150 (Truck)</option>
+            <option value="suzukiSwift">Suzuki Swift (Subcompact)</option>
         </select>
     </div>
 
@@ -316,12 +317,26 @@
             // Verification: 28 + 84 + 22 = 134 pixels ✓
         };
 
+        // Suzuki Swift (Subcompact/Supermini)
+        // Real: Length 3845mm, Width 1735mm, Wheelbase 2450mm
+        // Front overhang ~800mm, Rear overhang ~595mm
+        const suzukiSwift = {
+            name: 'Suzuki Swift',
+            width: 39,          // 1735 mm
+            height: 87,         // 3845 mm total length
+            wheelbase: 56,      // 2450 mm
+            rearOffset: 13,     // 595 mm rear overhang
+            frontOverhang: 18   // 800 mm front overhang
+            // Verification: 13 + 56 + 18 = 87 pixels ✓
+        };
+
         // Available car models
         const carModels = {
             vwPolo: vwPolo,
             toyotaCamry: toyotaCamry,
             smartForTwo: smartForTwo,
-            fordF150: fordF150
+            fordF150: fordF150,
+            suzukiSwift: suzukiSwift
         };
 
         // Currently selected car model (for player's car)
@@ -337,7 +352,7 @@
             angle: 0,
             velocity: 0,
             maxVelocity: 4,
-            acceleration: 0.1, // Reduced for smoother acceleration
+            acceleration: 0.08, // Reduced for smoother acceleration
             friction: 0.05,
             steeringAngle: 0,
             maxSteeringAngle: 0.6, // Max steering angle in radians (~35 degrees)
@@ -1144,14 +1159,6 @@
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 2;
                 ctx.strokeRect(x - wheelWidth / 2, y - wheelHeight / 2, wheelWidth, wheelHeight);
-
-                // Direction indicator
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(x, y - wheelHeight / 2);
-                ctx.lineTo(x, y - wheelHeight / 2 - 10);
-                ctx.stroke();
             }
         }
 
@@ -1182,12 +1189,12 @@
 
             // Front wheels (with steering)
             const frontAxleY = -car.wheelbase; // Wheelbase is measured between axles
-            drawWheel(-car.width / 2 + wheelOffset, frontAxleY, -car.steeringAngle, '#ff0000', wheelWidth, wheelHeight);
-            drawWheel(car.width / 2 - wheelOffset, frontAxleY, -car.steeringAngle, '#0000ff', wheelWidth, wheelHeight);
+            drawWheel(-car.width / 2 + wheelOffset, frontAxleY, -car.steeringAngle, '#ffa0a0', wheelWidth, wheelHeight);
+            drawWheel(car.width / 2 - wheelOffset, frontAxleY, -car.steeringAngle, '#a0a0ff', wheelWidth, wheelHeight);
 
             // Rear wheels (fixed)
-            drawWheel(-car.width / 2 + wheelOffset, 0, null, '#ffa500', wheelWidth, wheelHeight);
-            drawWheel(car.width / 2 - wheelOffset, 0, null, '#00ff00', wheelWidth, wheelHeight);
+            drawWheel(-car.width / 2 + wheelOffset, 0, null, '#ffa5a0', wheelWidth, wheelHeight);
+            drawWheel(car.width / 2 - wheelOffset, 0, null, '#a0ffa0', wheelWidth, wheelHeight);
 
             ctx.restore();
 
@@ -1243,10 +1250,10 @@
         }
 
         function drawTrajectories() {
-            drawTrajectory(trajectories.frontLeft, 'rgba(255, 0, 0, 1)');
-            drawTrajectory(trajectories.frontRight, 'rgba(0, 0, 255, 1)');
-            drawTrajectory(trajectories.rearLeft, 'rgba(255, 165, 0, 1)');
-            drawTrajectory(trajectories.rearRight, 'rgba(0, 255, 0, 1)');
+            drawTrajectory(trajectories.frontLeft, 'rgba(255, 100, 100, 1)');
+            drawTrajectory(trajectories.frontRight, 'rgba(100, 100, 255, 1)');
+            drawTrajectory(trajectories.rearLeft, 'rgba(255, 165, 100, 1)');
+            drawTrajectory(trajectories.rearRight, 'rgba(100, 255, 100, 1)');
         }
 
         function drawUI() {
@@ -1268,31 +1275,6 @@
             const steeringDegrees = (car.steeringAngle * 180 / Math.PI).toFixed(1);
             ctx.fillText(`Steering: ${steeringDegrees}°`, 10, 60);
 
-            // Trajectory legend
-            const legendX = canvas.width - 150;
-            const legendY = 10;
-            ctx.font = '12px Arial';
-            ctx.fillStyle = 'white';
-            ctx.fillText('Wheel Trajectories:', legendX, legendY);
-
-            const colors = [
-                { name: 'Front Left', color: 'rgb(255, 0, 0)' },
-                { name: 'Front Right', color: 'rgb(0, 0, 255)' },
-                { name: 'Rear Left', color: 'rgb(255, 165, 0)' },
-                { name: 'Rear Right', color: 'rgb(0, 255, 0)' }
-            ];
-
-            colors.forEach((item, i) => {
-                const y = legendY + 20 + i * 18;
-                ctx.strokeStyle = item.color;
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(legendX, y);
-                ctx.lineTo(legendX + 20, y);
-                ctx.stroke();
-                ctx.fillStyle = 'white';
-                ctx.fillText(item.name, legendX + 25, y + 4);
-            });
 
             // Game over message
             if (gameOver) {
@@ -1337,8 +1319,8 @@
 
             // Only draw car and trajectories in play mode
             if (!editorMode) {
-                drawCar();
                 drawTrajectories();
+                drawCar();
             }
 
             drawUI();
