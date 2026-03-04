@@ -382,11 +382,11 @@
         let parked = false;
         let gameOver = false;
 
-        // Timer and death count tracking
-        let greenTimer = 0;      // Total time spent on map (milliseconds)
+        // Timer and stats tracking
         let whiteTimer = 0;      // Current attempt time (milliseconds)
-        let deathCount = 0;      // Number of deaths
         let lastFrameTime = Date.now();
+        let attemptsCount = 0;   // Number of attempts (loaded from localStorage)
+        let highScore = null;    // Best time in milliseconds (loaded from localStorage)
 
         // Editor state
         let editorMode = false;
@@ -426,9 +426,10 @@
                 keys.right = true;
             }
             if (e.key === 'r' || e.key === 'R') {
-                // Count as death if manually resetting (not already in gameOver state)
+                // Count as attempt if manually resetting (not already in gameOver state)
                 if (!gameOver && !parked && !editorMode) {
-                    deathCount++;
+                    attemptsCount++;
+                    saveStats();
                 }
                 resetGame();
             }
@@ -515,9 +516,8 @@
             car.height = selectedCarModel.height;
             car.wheelbase = selectedCarModel.wheelbase;
 
-            // Reset green timer and death count when changing cars
-            greenTimer = 0;
-            deathCount = 0;
+            // Load stats for new car+map combination
+            loadStats();
 
             // Reset the game with new car dimensions
             resetGame();
@@ -529,12 +529,6 @@
             car.angle = startPos.rotation * Math.PI / 180;
             car.velocity = 0;
             car.steeringAngle = 0;
-
-            // If completing the map (parked), reset green timer and death count
-            if (parked) {
-                greenTimer = 0;
-                deathCount = 0;
-            }
 
             parked = false;
             gameOver = false;
@@ -581,12 +575,11 @@
         function update() {
             if (parked || gameOver) return;
 
-            // Update timers
+            // Update timer
             const currentTime = Date.now();
             const deltaTime = currentTime - lastFrameTime;
             lastFrameTime = currentTime;
 
-            greenTimer += deltaTime;
             whiteTimer += deltaTime;
 
             // Calculate speed-dependent max steering angle
@@ -658,7 +651,8 @@
                 // Collision detected - game over
                 gameOver = true;
                 car.velocity = 0;
-                deathCount++;
+                attemptsCount++;
+                saveStats();
 
                 // DEBUG: Log collision details
                 console.log('=== COLLISION DETECTED ===');
@@ -847,6 +841,12 @@
             if (allInside && isAligned && Math.abs(car.velocity) < 0.5) {
                 parked = true;
                 car.velocity = 0;
+
+                // Update high score if this is better or first completion
+                if (highScore === null || whiteTimer < highScore) {
+                    highScore = whiteTimer;
+                    saveStats();
+                }
             }
         }
 
@@ -1298,6 +1298,34 @@
             return `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
         }
 
+        function getStatsKey() {
+            // Create key based on car type + map
+            const carKey = document.getElementById('carSelect').value;
+            return `parkingStats_${currentLevelKey}_${carKey}`;
+        }
+
+        function loadStats() {
+            const key = getStatsKey();
+            const saved = localStorage.getItem(key);
+            if (saved) {
+                const stats = JSON.parse(saved);
+                attemptsCount = stats.attempts || 0;
+                highScore = stats.highScore || null;
+            } else {
+                attemptsCount = 0;
+                highScore = null;
+            }
+        }
+
+        function saveStats() {
+            const key = getStatsKey();
+            const stats = {
+                attempts: attemptsCount,
+                highScore: highScore
+            };
+            localStorage.setItem(key, JSON.stringify(stats));
+        }
+
         function drawUI() {
             // Editor mode indicator
             if (editorMode) {
@@ -1317,16 +1345,21 @@
             const steeringDegrees = (car.steeringAngle * 180 / Math.PI).toFixed(1);
             ctx.fillText(`Steering: ${steeringDegrees}°`, 10, 60);
 
-            // Timer and death count display (top right)
+            // Timer and stats display (top right)
             ctx.textAlign = 'right';
-            ctx.fillStyle = '#2ecc71'; // Green color for total timer
+            ctx.fillStyle = 'white'; // White color for current attempt timer
             ctx.font = 'bold 16px Arial';
-            ctx.fillText(`Total: ${formatTime(greenTimer)}`, canvas.width - 10, 20);
+            ctx.fillText(`Time: ${formatTime(whiteTimer)}`, canvas.width - 10, 20);
 
-            ctx.fillStyle = 'white'; // White color for attempt timer
-            ctx.fillText(`Attempt: ${formatTime(whiteTimer)}`, canvas.width - 10, 40);
+            ctx.fillStyle = '#f39c12'; // Orange color for high score
+            if (highScore !== null) {
+                ctx.fillText(`Best: ${formatTime(highScore)}`, canvas.width - 10, 40);
+            } else {
+                ctx.fillText(`Best: --:--.--`, canvas.width - 10, 40);
+            }
 
-            ctx.fillText(`Deaths: ${deathCount}`, canvas.width - 10, 60);
+            ctx.fillStyle = 'white';
+            ctx.fillText(`Attempts: ${attemptsCount}`, canvas.width - 10, 60);
             ctx.textAlign = 'left';
 
 
@@ -1354,11 +1387,17 @@
 
                 ctx.fillStyle = 'white';
                 ctx.font = '20px Arial';
-                ctx.fillStyle = '#2ecc71';
-                ctx.fillText(`Total Time: ${formatTime(greenTimer)}`, canvas.width / 2, canvas.height / 2 - 20);
+                ctx.fillText(`Attempt Time: ${formatTime(whiteTimer)}`, canvas.width / 2, canvas.height / 2 - 20);
+
+                ctx.fillStyle = '#f39c12';
+                if (highScore !== null) {
+                    ctx.fillText(`Best Time: ${formatTime(highScore)}`, canvas.width / 2, canvas.height / 2 + 10);
+                } else {
+                    ctx.fillText(`Best Time: --:--.--`, canvas.width / 2, canvas.height / 2 + 10);
+                }
+
                 ctx.fillStyle = 'white';
-                ctx.fillText(`Attempt Time: ${formatTime(whiteTimer)}`, canvas.width / 2, canvas.height / 2 + 10);
-                ctx.fillText(`Deaths: ${deathCount}`, canvas.width / 2, canvas.height / 2 + 40);
+                ctx.fillText(`Attempts: ${attemptsCount}`, canvas.width / 2, canvas.height / 2 + 40);
 
                 ctx.font = '24px Arial';
                 ctx.fillText('Press R to Restart', canvas.width / 2, canvas.height / 2 + 80);
@@ -1388,11 +1427,19 @@
                 ctx.fillText(`${levelName} - ${selectedCarModel.name}`, canvas.width / 2, canvas.height / 2 - 60);
 
                 ctx.font = '20px Arial';
-                ctx.fillStyle = '#2ecc71';
-                ctx.fillText(`Total Time: ${formatTime(greenTimer)}`, canvas.width / 2, canvas.height / 2 - 20);
                 ctx.fillStyle = 'white';
-                ctx.fillText(`Attempt Time: ${formatTime(whiteTimer)}`, canvas.width / 2, canvas.height / 2 + 10);
-                ctx.fillText(`Deaths: ${deathCount}`, canvas.width / 2, canvas.height / 2 + 40);
+                ctx.fillText(`Time: ${formatTime(whiteTimer)}`, canvas.width / 2, canvas.height / 2 - 20);
+
+                ctx.fillStyle = '#f39c12';
+                const isNewRecord = highScore === whiteTimer;
+                if (isNewRecord) {
+                    ctx.fillText(`🏆 NEW BEST TIME! 🏆`, canvas.width / 2, canvas.height / 2 + 10);
+                } else {
+                    ctx.fillText(`Best Time: ${formatTime(highScore)}`, canvas.width / 2, canvas.height / 2 + 10);
+                }
+
+                ctx.fillStyle = 'white';
+                ctx.fillText(`Attempts: ${attemptsCount}`, canvas.width / 2, canvas.height / 2 + 40);
 
                 ctx.font = '24px Arial';
                 ctx.fillText('Press R to Restart', canvas.width / 2, canvas.height / 2 + 80);
@@ -1637,10 +1684,6 @@
                 return;
             }
 
-            // Reset green timer and death count when changing levels
-            greenTimer = 0;
-            deathCount = 0;
-
             if (value.startsWith('saved_')) {
                 const levelName = value.substring(6);
                 const levels = getSavedLevels();
@@ -1768,6 +1811,9 @@
                 target.height = finishPos.height;
                 target.rotation = finishPos.rotation * Math.PI / 180;
             }
+
+            // Load stats for this level+car combination
+            loadStats();
 
             resetGame();
         }
