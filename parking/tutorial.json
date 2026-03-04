@@ -1,0 +1,16 @@
+[
+  {
+    "type": "start",
+    "posX": 220,
+    "posY": 310,
+    "rotation": 90
+  },
+  {
+    "type": "finish",
+    "posX": 545,
+    "posY": 317,
+    "width": 50,
+    "height": 80,
+    "rotation": 0
+  }
+]

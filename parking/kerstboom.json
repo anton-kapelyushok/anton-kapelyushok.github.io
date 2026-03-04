@@ -1,0 +1,116 @@
+[
+  {
+    "type": "start",
+    "posX": 600,
+    "posY": 449.5,
+    "rotation": 45
+  },
+  {
+    "type": "finish",
+    "posX": 622,
+    "posY": 205.5,
+    "width": 50,
+    "height": 80,
+    "rotation": 225
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 432,
+    "posY": 65,
+    "rotation": 0,
+    "size": 140
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 431,
+    "posY": 207,
+    "rotation": 0,
+    "size": 140
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 432,
+    "posY": 485,
+    "rotation": 0,
+    "size": 140
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 431,
+    "posY": 602,
+    "rotation": 0,
+    "size": 140
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 597,
+    "posY": 90.5,
+    "rotation": 45
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 598,
+    "posY": 159.5,
+    "rotation": 45
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 600,
+    "posY": 293.5,
+    "rotation": 45
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 600,
+    "posY": 375,
+    "rotation": 45
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 600,
+    "posY": 525,
+    "rotation": 45
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 431,
+    "posY": 348.5,
+    "rotation": 0,
+    "size": 140
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 731,
+    "posY": 195.5,
+    "rotation": 0,
+    "size": 140
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 732,
+    "posY": 54.5,
+    "rotation": 0,
+    "size": 140
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 732,
+    "posY": 338.5,
+    "rotation": 0,
+    "size": 140
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 732,
+    "posY": 480.5,
+    "rotation": 0,
+    "size": 140
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 733,
+    "posY": 555.5,
+    "rotation": 0,
+    "size": 140
+  }
+]

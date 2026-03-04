@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking Simulator</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #2c3e50;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        #gameCanvas {
+            border: 3px solid #34495e;
+            background-color: #27ae60;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        #info {
+            margin-top: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        #controls {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #34495e;
+            border-radius: 8px;
+            color: #ecf0f1;
+        }
+
+        #editorPanel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #34495e;
+            padding: 20px;
+            border-radius: 8px;
+            color: #ecf0f1;
+            max-width: 300px;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: none;
+        }
+
+        #editorPanel.active {
+            display: block;
+        }
+
+        .editor-button {
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .editor-button:hover {
+            background-color: #2980b9;
+        }
+
+        .editor-button.danger {
+            background-color: #e74c3c;
+        }
+
+        .editor-button.danger:hover {
+            background-color: #c0392b;
+        }
+
+        .editor-button.success {
+            background-color: #27ae60;
+        }
+
+        .editor-button.success:hover {
+            background-color: #229954;
+        }
+
+        .editor-section {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #2c3e50;
+            border-radius: 4px;
+        }
+
+        .editor-section h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #7f8c8d;
+            background-color: #ecf0f1;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            min-height: 100px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        #toggleEditor {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        #levelControls {
+            position: fixed;
+            top: 70px;
+            left: 20px;
+            z-index: 1000;
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 8px;
+            color: #ecf0f1;
+        }
+
+        #levelControls select {
+            width: 200px;
+            margin-bottom: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <button id="toggleEditor" class="editor-button">Level Editor</button>
+
+    <div id="levelControls">
+        <h3 style="margin: 0 0 10px 0; font-size: 16px;">Select Level</h3>
+        <select id="levelSelect">
+            <option value="custom">Custom Level</option>
+        </select>
+        <button class="editor-button" onclick="loadSelectedLevel()">Load Level</button>
+    </div>
+
+    <div id="editorPanel">
+        <h2>Level Editor</h2>
+
+        <div class="editor-section">
+            <h3>Add Object</h3>
+            <select id="objectType">
+                <option value="obstacleSquare">Obstacle Square</option>
+                <option value="obstacleCar">Obstacle Car</option>
+                <option value="start">Start Position</option>
+                <option value="finish">Finish Zone</option>
+            </select>
+            <button class="editor-button success" onclick="addObject()">Add to Center</button>
+        </div>
+
+        <div class="editor-section">
+            <h3>Instructions</h3>
+            <p style="font-size: 12px; margin: 5px 0;">
+                • Click objects to select<br>
+                • Drag mouse to move selected<br>
+                • Q/E to rotate selected<br>
+                • C to copy selected<br>
+                • D or Del to delete selected<br>
+                • +/- to resize obstacles
+            </p>
+        </div>
+
+        <div class="editor-section">
+            <h3>Save/Load</h3>
+            <input type="text" id="levelName" placeholder="Level name">
+            <button class="editor-button success" onclick="saveLevel()">Save to Storage</button>
+            <button class="editor-button danger" onclick="deleteLevel()">Delete Level</button>
+        </div>
+
+        <div class="editor-section">
+            <h3>Import/Export</h3>
+            <button class="editor-button" onclick="exportLevel()">Export JSON</button>
+            <textarea id="importArea" placeholder="Paste level JSON here"></textarea>
+            <button class="editor-button" onclick="importLevel()">Import JSON</button>
+        </div>
+
+        <div class="editor-section">
+            <button class="editor-button" onclick="testLevel()">Test Level</button>
+            <button class="editor-button danger" onclick="clearLevel()">Clear All</button>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="info">
+        <div id="controls">
+            <strong>Controls:</strong><br>
+            ↑ Up Arrow - Accelerate<br>
+            ↓ Down Arrow - Brake/Reverse<br>
+            ← → Left/Right Arrows - Steer
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Predefined levels metadata
+        const predefinedLevels = {
+            'tutorial': { name: 'Tutorial', file: 'tutorial.json' },
+            'box': { name: 'Box', file: 'box.json' },
+            'parallel': { name: 'Parallel', file: 'parallel.json' },
+            'kerstboom': { name: 'Kerstboom', file: 'kerstboom.json' },
+        };
+
+        // Current level
+        let currentLevel = [];
+        let level = currentLevel;
+        let currentLevelKey = 'level1';
+
+        // Extract start, finish, and obstacles from level
+        let startPos = null;
+        let finishPos = null;
+        let obstacles = [];
+
+        // Car properties
+        const car = {
+            x: 100,
+            y: 100,
+            width: 40,
+            height: 70,
+            wheelbase: 50, // Distance between front and rear axle
+            angle: 0,
+            velocity: 0,
+            maxVelocity: 4,
+            acceleration: 0.015, // Reduced for smoother acceleration
+            friction: 0.05,
+            steeringAngle: 0,
+            maxSteeringAngle: 0.6, // Max steering angle in radians (~35 degrees)
+            steeringSpeed: 0.0225 // Steering speed (1.5x faster)
+        };
+
+        // Target parking spot
+        const target = {
+            x: 600,
+            y: 400,
+            width: 50,
+            height: 80,
+            rotation: 0
+        };
+
+        // Keyboard state
+        const keys = {
+            up: false,
+            down: false,
+            left: false,
+            right: false,
+            r: false
+        };
+
+        let parked = false;
+        let gameOver = false;
+
+        // Editor state
+        let editorMode = false;
+        let selectedObject = null;
+        let isDragging = false;
+
+        // Debug flag
+        let debugMode = false;
+
+        // Wheel trajectories
+        const trajectories = {
+            frontLeft: [],
+            frontRight: [],
+            rearLeft: [],
+            rearRight: []
+        };
+        const maxTrajectoryLength = 150; // Number of points to keep
+        const trajectoryInterval = 2; // Add point every N frames
+        let frameCount = 0;
+
+        // Event listeners
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                keys.up = true;
+            }
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                keys.down = true;
+            }
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                keys.left = true;
+            }
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                keys.right = true;
+            }
+            if (e.key === 'r' || e.key === 'R') {
+                resetGame();
+            }
+            if (e.key === 'b' || e.key === 'B') {
+                debugMode = !debugMode;
+                console.log('Debug mode:', debugMode);
+            }
+            if (e.key === ' ') {
+                e.preventDefault();
+                console.log('=== DEBUG INFO ===');
+                console.log('Car:', JSON.stringify({
+                    x: car.x,
+                    y: car.y,
+                    angle: car.angle,
+                    angleDegrees: car.angle * 180 / Math.PI,
+                    velocity: car.velocity
+                }, null, 2));
+                console.log('Parking spot:', JSON.stringify({
+                    x: target.x,
+                    y: target.y,
+                    width: target.width,
+                    height: target.height,
+                    rotation: target.rotation,
+                    rotationDegrees: target.rotation * 180 / Math.PI
+                }, null, 2));
+                if (finishPos) {
+                    console.log('Finish position (from level):', JSON.stringify(finishPos, null, 2));
+                }
+
+                // Check parking validation details
+                const corners = getCarCorners();
+                console.log('Car corners:', JSON.stringify(corners, null, 2));
+
+                let allInside = true;
+                for (let i = 0; i < corners.length; i++) {
+                    const corner = corners[i];
+                    const inside = pointInRotatedRect(corner, target.x, target.y, target.width, target.height, target.rotation);
+                    console.log(`Corner ${i} inside: ${inside}`);
+                    if (!inside) allInside = false;
+                }
+                console.log('All corners inside:', allInside);
+
+                const normalizedCarAngle = ((car.angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+                const normalizedTargetAngle = ((target.rotation % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+                let angleDiff = Math.abs(normalizedCarAngle - normalizedTargetAngle);
+                if (angleDiff > Math.PI) {
+                    angleDiff = 2 * Math.PI - angleDiff;
+                }
+                const isAlignedSameDirection = angleDiff < 0.15;
+                const isAlignedOppositeDirection = Math.abs(angleDiff - Math.PI) < 0.15;
+                const isAligned = isAlignedSameDirection || isAlignedOppositeDirection;
+                console.log('Angle aligned:', isAligned, 'same dir:', isAlignedSameDirection, 'opposite dir:', isAlignedOppositeDirection);
+                console.log('Angle diff (radians):', angleDiff, 'diff (degrees):', angleDiff * 180 / Math.PI);
+                console.log('Velocity check:', Math.abs(car.velocity) < 0.5);
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                keys.up = false;
+            }
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                keys.down = false;
+            }
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                keys.left = false;
+            }
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                keys.right = false;
+            }
+        });
+
+        function resetGame() {
+            car.x = startPos.posX;
+            car.y = startPos.posY;
+            car.angle = startPos.rotation * Math.PI / 180;
+            car.velocity = 0;
+            car.steeringAngle = 0;
+            parked = false;
+            gameOver = false;
+
+            // Clear trajectories
+            trajectories.frontLeft = [];
+            trajectories.frontRight = [];
+            trajectories.rearLeft = [];
+            trajectories.rearRight = [];
+            frameCount = 0;
+        }
+
+        function getWheelPositions() {
+            const wheelOffset = 10;
+            const rearOffset = 10;
+            const frontAxleY = -car.wheelbase + rearOffset;
+
+            // Calculate wheel positions in local coordinates
+            const localWheels = {
+                frontLeft: { x: -car.width / 2 + wheelOffset, y: frontAxleY },
+                frontRight: { x: car.width / 2 - wheelOffset, y: frontAxleY },
+                rearLeft: { x: -car.width / 2 + wheelOffset, y: 0 },
+                rearRight: { x: car.width / 2 - wheelOffset, y: 0 }
+            };
+
+            // Transform to world coordinates
+            const worldWheels = {};
+            for (let [key, local] of Object.entries(localWheels)) {
+                const rotatedX = local.x * Math.cos(car.angle) - local.y * Math.sin(car.angle);
+                const rotatedY = local.x * Math.sin(car.angle) + local.y * Math.cos(car.angle);
+                worldWheels[key] = {
+                    x: car.x + rotatedX,
+                    y: car.y + rotatedY
+                };
+            }
+
+            return worldWheels;
+        }
+
+        function update() {
+            if (parked || gameOver) return;
+
+            // Calculate speed-dependent max steering angle
+            // At low speeds (< 2.5), full steering available
+            // At high speeds, progressively reduce max steering (linear, but not below 60%)
+            const speedThreshold = 2.5;
+            let effectiveMaxSteering = car.maxSteeringAngle;
+            if (Math.abs(car.velocity) > speedThreshold) {
+                // Linear reduction with 60% minimum
+                const speedFactor = speedThreshold / Math.abs(car.velocity);
+                const minSteering = 0.6; // Never go below 60% of max steering
+                effectiveMaxSteering = car.maxSteeringAngle * Math.max(minSteering, speedFactor);
+            }
+
+            // Steering - linear increase
+            if (keys.left) {
+                car.steeringAngle = Math.min(car.steeringAngle + car.steeringSpeed, effectiveMaxSteering);
+            } else if (keys.right) {
+                car.steeringAngle = Math.max(car.steeringAngle - car.steeringSpeed, -effectiveMaxSteering);
+            } else {
+                // Return steering to center
+                if (Math.abs(car.steeringAngle) > 0.01) {
+                    car.steeringAngle *= 0.85;
+                } else {
+                    car.steeringAngle = 0;
+                }
+            }
+
+            // Clamp steering angle if it exceeds speed-dependent limit
+            car.steeringAngle = Math.max(-effectiveMaxSteering, Math.min(effectiveMaxSteering, car.steeringAngle));
+
+            // Acceleration/Braking - linear/constant
+            if (keys.up) {
+                car.velocity = Math.min(car.velocity + car.acceleration, car.maxVelocity);
+            } else if (keys.down) {
+                car.velocity = Math.max(car.velocity - car.acceleration, -car.maxVelocity * 0.5);
+            } else {
+                // Apply friction
+                if (Math.abs(car.velocity) > 0.01) {
+                    car.velocity *= (1 - car.friction);
+                } else {
+                    car.velocity = 0;
+                }
+            }
+
+            // Car physics using Ackermann steering geometry
+            // The rear axle moves in the direction the car is facing
+            // The front axle determines the turning radius
+
+            // Move the rear axle (car position is rear axle center)
+            car.x += Math.sin(car.angle) * car.velocity;
+            car.y -= Math.cos(car.angle) * car.velocity;
+
+            // Calculate angular velocity based on steering angle and wheelbase
+            // This makes the car rotate around the rear axle
+            if (Math.abs(car.velocity) > 0.01 && Math.abs(car.steeringAngle) > 0.01) {
+                const angularVelocity = (car.velocity * Math.tan(car.steeringAngle)) / car.wheelbase;
+                car.angle -= angularVelocity; // Negative to fix steering direction
+            }
+
+            // Keep car on screen (with margin for car size)
+            const margin = 50;
+            car.x = Math.max(margin, Math.min(canvas.width - margin, car.x));
+            car.y = Math.max(margin, Math.min(canvas.height - margin, car.y));
+
+            // Check for collisions with obstacles
+            const collidedObstacle = checkCollisions();
+            if (collidedObstacle) {
+                // Collision detected - game over
+                gameOver = true;
+                car.velocity = 0;
+
+                // DEBUG: Log collision details
+                console.log('=== COLLISION DETECTED ===');
+                console.log('Car corners:', JSON.stringify(getCarCorners(), null, 2));
+                console.log('Collided obstacle:', JSON.stringify(collidedObstacle, null, 2));
+                console.log('Obstacle corners:', JSON.stringify(getObstacleCorners(collidedObstacle), null, 2));
+            }
+
+            // Update wheel trajectories
+            frameCount++;
+            if (frameCount % trajectoryInterval === 0) {
+                const wheelPositions = getWheelPositions();
+
+                // Add current positions to trajectories
+                trajectories.frontLeft.push({ x: wheelPositions.frontLeft.x, y: wheelPositions.frontLeft.y });
+                trajectories.frontRight.push({ x: wheelPositions.frontRight.x, y: wheelPositions.frontRight.y });
+                trajectories.rearLeft.push({ x: wheelPositions.rearLeft.x, y: wheelPositions.rearLeft.y });
+                trajectories.rearRight.push({ x: wheelPositions.rearRight.x, y: wheelPositions.rearRight.y });
+
+                // Limit trajectory length
+                if (trajectories.frontLeft.length > maxTrajectoryLength) {
+                    trajectories.frontLeft.shift();
+                    trajectories.frontRight.shift();
+                    trajectories.rearLeft.shift();
+                    trajectories.rearRight.shift();
+                }
+            }
+
+            // Check if parked
+            checkParking();
+        }
+
+        function checkCollisions() {
+            const carCorners = getCarCorners();
+            // Always get fresh obstacles from level
+            const currentObstacles = level.filter(item => item.type === 'obstacleSquare' || item.type === 'obstacleCar');
+
+            for (let obstacle of currentObstacles) {
+                const obstacleCorners = getObstacleCorners(obstacle);
+
+                // Use SAT (Separating Axis Theorem) collision detection
+                // Check if polygons are separated by testing projections on each edge normal
+
+                // Test car edges
+                if (polygonsIntersect(carCorners, obstacleCorners)) {
+                    return obstacle;
+                }
+            }
+
+            return null;
+        }
+
+        function polygonsIntersect(poly1, poly2) {
+            // Test all edges of both polygons
+            const edges = [];
+
+            // Get edges from poly1
+            for (let i = 0; i < poly1.length; i++) {
+                const p1 = poly1[i];
+                const p2 = poly1[(i + 1) % poly1.length];
+                edges.push({ x: p2.y - p1.y, y: -(p2.x - p1.x) }); // perpendicular
+            }
+
+            // Get edges from poly2
+            for (let i = 0; i < poly2.length; i++) {
+                const p1 = poly2[i];
+                const p2 = poly2[(i + 1) % poly2.length];
+                edges.push({ x: p2.y - p1.y, y: -(p2.x - p1.x) }); // perpendicular
+            }
+
+            // Test each axis
+            for (let edge of edges) {
+                // Normalize the axis
+                const len = Math.sqrt(edge.x * edge.x + edge.y * edge.y);
+                if (len < 0.0001) continue;
+                const axis = { x: edge.x / len, y: edge.y / len };
+
+                // Project poly1 onto axis
+                let min1 = Infinity, max1 = -Infinity;
+                for (let p of poly1) {
+                    const proj = p.x * axis.x + p.y * axis.y;
+                    min1 = Math.min(min1, proj);
+                    max1 = Math.max(max1, proj);
+                }
+
+                // Project poly2 onto axis
+                let min2 = Infinity, max2 = -Infinity;
+                for (let p of poly2) {
+                    const proj = p.x * axis.x + p.y * axis.y;
+                    min2 = Math.min(min2, proj);
+                    max2 = Math.max(max2, proj);
+                }
+
+                // Check for separation
+                if (max1 < min2 || max2 < min1) {
+                    return false; // Found separating axis, no collision
+                }
+            }
+
+            return true; // No separating axis found, collision!
+        }
+
+        function getObstacleCorners(obstacle) {
+            const corners = [];
+            const angle = obstacle.rotation * Math.PI / 180;
+
+            let localCorners;
+            if (obstacle.type === 'obstacleCar') {
+                // Car obstacle corners (same as car shape)
+                const carWidth = 40;
+                const carHeight = 70;
+                const rearOffset = 10;
+
+                localCorners = [
+                    { x: -carWidth / 2, y: rearOffset },
+                    { x: carWidth / 2, y: rearOffset },
+                    { x: carWidth / 2, y: -carHeight + rearOffset },
+                    { x: -carWidth / 2, y: -carHeight + rearOffset }
+                ];
+            } else {
+                // Square obstacle corners
+                const halfSize = obstacle.size / 2;
+                localCorners = [
+                    { x: -halfSize, y: -halfSize },
+                    { x: halfSize, y: -halfSize },
+                    { x: halfSize, y: halfSize },
+                    { x: -halfSize, y: halfSize }
+                ];
+            }
+
+            for (let local of localCorners) {
+                const rotatedX = local.x * Math.cos(angle) - local.y * Math.sin(angle);
+                const rotatedY = local.x * Math.sin(angle) + local.y * Math.cos(angle);
+                corners.push({
+                    x: obstacle.posX + rotatedX,
+                    y: obstacle.posY + rotatedY
+                });
+            }
+
+            return corners;
+        }
+
+        function pointInRotatedRect(point, rectX, rectY, rectWidth, rectHeight, rectAngle) {
+            // Transform point to rectangle's local coordinate system
+            const dx = point.x - rectX;
+            const dy = point.y - rectY;
+
+            // Rotate point backwards
+            const localX = dx * Math.cos(-rectAngle) - dy * Math.sin(-rectAngle);
+            const localY = dx * Math.sin(-rectAngle) + dy * Math.cos(-rectAngle);
+
+            // Check if point is inside the unrotated rectangle
+            return Math.abs(localX) <= rectWidth / 2 && Math.abs(localY) <= rectHeight / 2;
+        }
+
+        function checkParking() {
+            // Get car corners
+            const corners = getCarCorners();
+
+            // Check if all corners are inside the target (using rotated rect check)
+            let allInside = true;
+            for (let corner of corners) {
+                if (!pointInRotatedRect(corner, target.x, target.y, target.width, target.height, target.rotation)) {
+                    allInside = false;
+                    break;
+                }
+            }
+
+            // Check if car is aligned with parking spot rotation
+            const normalizedCarAngle = ((car.angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+            const normalizedTargetAngle = ((target.rotation % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+            const angleThreshold = 0.15;
+
+            // Calculate angular difference handling wrap-around at 0/2π
+            let angleDiff = Math.abs(normalizedCarAngle - normalizedTargetAngle);
+            // Handle wrap-around (e.g., 359° vs 1° should be 2°, not 358°)
+            if (angleDiff > Math.PI) {
+                angleDiff = 2 * Math.PI - angleDiff;
+            }
+
+            // Check if aligned in same direction OR opposite direction (180° is also valid)
+            const isAlignedSameDirection = angleDiff < angleThreshold;
+            const isAlignedOppositeDirection = Math.abs(angleDiff - Math.PI) < angleThreshold;
+            const isAligned = isAlignedSameDirection || isAlignedOppositeDirection;
+
+            if (allInside && isAligned && Math.abs(car.velocity) < 0.5) {
+                parked = true;
+                car.velocity = 0;
+            }
+        }
+
+        function getCarCorners() {
+            const corners = [];
+            const halfWidth = car.width / 2;
+
+            // Car position (x,y) is at rear axle center
+            // Front of car is in negative Y direction (direction of travel)
+            const rearOffset = 10; // Small offset behind rear axle
+
+            // Calculate corners relative to rear axle (car position)
+            const localCorners = [
+                { x: -halfWidth, y: rearOffset }, // Rear left (behind rear axle)
+                { x: halfWidth, y: rearOffset },  // Rear right (behind rear axle)
+                { x: halfWidth, y: -car.height + rearOffset },  // Front right
+                { x: -halfWidth, y: -car.height + rearOffset }  // Front left
+            ];
+
+            // Rotate and translate corners
+            for (let local of localCorners) {
+                const rotatedX = local.x * Math.cos(car.angle) - local.y * Math.sin(car.angle);
+                const rotatedY = local.x * Math.sin(car.angle) + local.y * Math.cos(car.angle);
+                corners.push({
+                    x: car.x + rotatedX,
+                    y: car.y + rotatedY
+                });
+            }
+
+            return corners;
+        }
+
+        function drawBackground() {
+            ctx.fillStyle = '#27ae60';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw parking lines (decorative)
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            for (let i = 50; i < canvas.width; i += 100) {
+                ctx.setLineDash([10, 10]);
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+        }
+
+        function drawParkingTarget() {
+            // Get finish position from level array (important for editor)
+            const finish = level.find(item => item.type === 'finish');
+            if (!finish) return;
+
+            ctx.save();
+            ctx.translate(finish.posX, finish.posY);
+            ctx.rotate(finish.rotation * Math.PI / 180);
+
+            ctx.fillStyle = parked ? '#f39c12' : 'rgba(52, 152, 219, 0.3)';
+            ctx.fillRect(-finish.width / 2, -finish.height / 2, finish.width, finish.height);
+            ctx.strokeStyle = parked ? '#e67e22' : '#3498db';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-finish.width / 2, -finish.height / 2, finish.width, finish.height);
+
+            ctx.restore();
+
+            // DEBUG: Draw parking zone corners
+            if (debugMode) {
+                const parkingCorners = [
+                    { x: -finish.width / 2, y: -finish.height / 2 },
+                    { x: finish.width / 2, y: -finish.height / 2 },
+                    { x: finish.width / 2, y: finish.height / 2 },
+                    { x: -finish.width / 2, y: finish.height / 2 }
+                ];
+
+                const angle = finish.rotation * Math.PI / 180;
+                ctx.fillStyle = 'lime';
+                parkingCorners.forEach((corner, i) => {
+                    const rotatedX = corner.x * Math.cos(angle) - corner.y * Math.sin(angle);
+                    const rotatedY = corner.x * Math.sin(angle) + corner.y * Math.cos(angle);
+                    const worldX = finish.posX + rotatedX;
+                    const worldY = finish.posY + rotatedY;
+
+                    ctx.beginPath();
+                    ctx.arc(worldX, worldY, 5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = 'white';
+                    ctx.font = '10px Arial';
+                    ctx.fillText('P' + i, worldX + 8, worldY + 4);
+                    ctx.fillStyle = 'lime';
+                });
+
+                // Draw lines connecting parking corners
+                ctx.strokeStyle = 'lime';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                parkingCorners.forEach((corner, i) => {
+                    const rotatedX = corner.x * Math.cos(angle) - corner.y * Math.sin(angle);
+                    const rotatedY = corner.x * Math.sin(angle) + corner.y * Math.cos(angle);
+                    const worldX = finish.posX + rotatedX;
+                    const worldY = finish.posY + rotatedY;
+
+                    if (i === 0) {
+                        ctx.moveTo(worldX, worldY);
+                    } else {
+                        ctx.lineTo(worldX, worldY);
+                    }
+                });
+                ctx.closePath();
+                ctx.stroke();
+
+                // Check and mark car corners
+                if (!editorMode) {
+                    const carCorners = getCarCorners();
+                    carCorners.forEach((corner, i) => {
+                        const inside = pointInRotatedRect(corner, target.x, target.y, target.width, target.height, target.rotation);
+                        ctx.fillStyle = inside ? 'lime' : 'red';
+                        ctx.beginPath();
+                        ctx.arc(corner.x, corner.y, 7, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.fillStyle = 'white';
+                        ctx.font = '10px Arial';
+                        ctx.fillText('C' + i, corner.x + 10, corner.y + 4);
+                    });
+                }
+            }
+
+            ctx.fillStyle = '#3498db';
+            ctx.font = '16px Arial';
+            ctx.fillText('PARK HERE', finish.posX - 30, finish.posY - finish.height / 2 - 10);
+        }
+
+        function drawStartPosition() {
+            // Get start position from level array
+            const start = level.find(item => item.type === 'start');
+            if (!start) return;
+
+            ctx.save();
+            ctx.translate(start.posX, start.posY);
+            ctx.rotate(start.rotation * Math.PI / 180);
+
+            // Draw a simple car-like shape for start position
+            const width = 40;
+            const height = 70;
+            const rearOffset = 10;
+
+            ctx.fillStyle = 'rgba(46, 204, 113, 0.5)';
+            ctx.fillRect(-width / 2, -height + rearOffset, width, height);
+            ctx.strokeStyle = '#27ae60';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(-width / 2, -height + rearOffset, width, height);
+
+            // Front indicator
+            ctx.fillStyle = '#ecf0f1';
+            ctx.fillRect(-width / 2 + 5, -height + rearOffset, width - 10, 8);
+
+            ctx.restore();
+
+            ctx.fillStyle = '#27ae60';
+            ctx.font = '16px Arial';
+            ctx.fillText('START', start.posX - 25, start.posY + 50);
+        }
+
+        function drawObstacles() {
+            // Always filter fresh from level array (important for editor)
+            const currentObstacles = level.filter(item => item.type === 'obstacleSquare' || item.type === 'obstacleCar');
+
+            currentObstacles.forEach(obstacle => {
+                if (obstacle.type === 'obstacleCar') {
+                    // Draw car obstacle
+                    const carWidth = 40;
+                    const carHeight = 70;
+                    const rearOffset = 10;
+
+                    ctx.save();
+                    ctx.translate(obstacle.posX, obstacle.posY);
+                    ctx.rotate(obstacle.rotation * Math.PI / 180);
+
+                    // Car body
+                    ctx.fillStyle = '#95a5a6';
+                    ctx.fillRect(-carWidth / 2, -carHeight + rearOffset, carWidth, carHeight);
+                    ctx.strokeStyle = '#7f8c8d';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(-carWidth / 2, -carHeight + rearOffset, carWidth, carHeight);
+
+                    // Car front
+                    ctx.fillStyle = '#bdc3c7';
+                    ctx.fillRect(-carWidth / 2 + 5, -carHeight + rearOffset, carWidth - 10, 8);
+
+                    ctx.restore();
+                } else {
+                    // Draw square obstacle
+                    ctx.save();
+                    ctx.translate(obstacle.posX, obstacle.posY);
+                    ctx.rotate(obstacle.rotation * Math.PI / 180);
+
+                    ctx.fillStyle = '#7f8c8d';
+                    ctx.fillRect(-obstacle.size / 2, -obstacle.size / 2, obstacle.size, obstacle.size);
+                    ctx.strokeStyle = '#2c3e50';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(-obstacle.size / 2, -obstacle.size / 2, obstacle.size, obstacle.size);
+
+                    ctx.restore();
+                }
+
+                // DEBUG: Draw obstacle corners
+                if (debugMode) {
+                    const corners = getObstacleCorners(obstacle);
+                    ctx.fillStyle = 'cyan';
+                    corners.forEach((corner, i) => {
+                        ctx.beginPath();
+                        ctx.arc(corner.x, corner.y, 5, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // Label corners
+                        ctx.fillStyle = 'white';
+                        ctx.font = '10px Arial';
+                        ctx.fillText(i, corner.x + 8, corner.y + 4);
+                        ctx.fillStyle = 'cyan';
+                    });
+
+                    // Draw lines connecting corners
+                    ctx.strokeStyle = 'cyan';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    corners.forEach((corner, i) => {
+                        if (i === 0) {
+                            ctx.moveTo(corner.x, corner.y);
+                        } else {
+                            ctx.lineTo(corner.x, corner.y);
+                        }
+                    });
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+            });
+        }
+
+        function drawWheel(x, y, rotationAngle, color, wheelWidth, wheelHeight) {
+            if (rotationAngle !== null) {
+                // Steered wheel with rotation
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(rotationAngle);
+
+                ctx.fillStyle = '#2c3e50';
+                ctx.fillRect(-wheelWidth / 2, -wheelHeight / 2, wheelWidth, wheelHeight);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-wheelWidth / 2, -wheelHeight / 2, wheelWidth, wheelHeight);
+
+                // Direction indicator
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, -wheelHeight / 2);
+                ctx.lineTo(0, -wheelHeight / 2 - 10);
+                ctx.stroke();
+
+                ctx.restore();
+            } else {
+                // Fixed wheel without rotation
+                ctx.fillStyle = '#2c3e50';
+                ctx.fillRect(x - wheelWidth / 2, y - wheelHeight / 2, wheelWidth, wheelHeight);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x - wheelWidth / 2, y - wheelHeight / 2, wheelWidth, wheelHeight);
+
+                // Direction indicator
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x, y - wheelHeight / 2);
+                ctx.lineTo(x, y - wheelHeight / 2 - 10);
+                ctx.stroke();
+            }
+        }
+
+        function drawCar() {
+            ctx.save();
+            ctx.translate(car.x, car.y);
+            ctx.rotate(car.angle);
+
+            const rearOffset = 10;
+
+            // Car body (most of car is in front of rear axle)
+            ctx.fillStyle = parked ? '#f39c12' : '#e74c3c';
+            ctx.fillRect(-car.width / 2, -car.height + rearOffset, car.width, car.height);
+
+            // Car outline
+            ctx.strokeStyle = '#c0392b';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(-car.width / 2, -car.height + rearOffset, car.width, car.height);
+
+            // Car front (to show direction)
+            ctx.fillStyle = '#ecf0f1';
+            ctx.fillRect(-car.width / 2 + 5, -car.height + rearOffset, car.width - 10, 8);
+
+            // Wheels
+            const wheelWidth = 8;
+            const wheelHeight = 14;
+            const wheelOffset = 10;
+
+            // Front wheels (with steering)
+            const frontAxleY = -car.wheelbase + rearOffset;
+            drawWheel(-car.width / 2 + wheelOffset, frontAxleY, -car.steeringAngle, '#ff0000', wheelWidth, wheelHeight);
+            drawWheel(car.width / 2 - wheelOffset, frontAxleY, -car.steeringAngle, '#0000ff', wheelWidth, wheelHeight);
+
+            // Rear wheels (fixed)
+            drawWheel(-car.width / 2 + wheelOffset, 0, null, '#ffa500', wheelWidth, wheelHeight);
+            drawWheel(car.width / 2 - wheelOffset, 0, null, '#00ff00', wheelWidth, wheelHeight);
+
+            ctx.restore();
+
+            // DEBUG: Draw car corners
+            if (debugMode) {
+                const corners = getCarCorners();
+                ctx.fillStyle = 'yellow';
+                corners.forEach((corner, i) => {
+                    ctx.beginPath();
+                    ctx.arc(corner.x, corner.y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Label corners
+                    ctx.fillStyle = 'white';
+                    ctx.font = '10px Arial';
+                    ctx.fillText(i, corner.x + 8, corner.y + 4);
+                    ctx.fillStyle = 'yellow';
+                });
+
+                // Draw lines connecting corners
+                ctx.strokeStyle = 'yellow';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                corners.forEach((corner, i) => {
+                    if (i === 0) {
+                        ctx.moveTo(corner.x, corner.y);
+                    } else {
+                        ctx.lineTo(corner.x, corner.y);
+                    }
+                });
+                ctx.closePath();
+                ctx.stroke();
+            }
+        }
+
+        function drawTrajectory(trajectory, color) {
+            if (trajectory.length < 2) return;
+
+            ctx.lineWidth = 2;
+            const totalPoints = trajectory.length;
+
+            for (let i = 1; i < trajectory.length; i++) {
+                const alpha = i / totalPoints;
+                const point = trajectory[i];
+                const prevPoint = trajectory[i - 1];
+
+                ctx.strokeStyle = color.replace('1)', `${alpha})`);
+                ctx.beginPath();
+                ctx.moveTo(prevPoint.x, prevPoint.y);
+                ctx.lineTo(point.x, point.y);
+                ctx.stroke();
+            }
+        }
+
+        function drawTrajectories() {
+            drawTrajectory(trajectories.frontLeft, 'rgba(255, 0, 0, 1)');
+            drawTrajectory(trajectories.frontRight, 'rgba(0, 0, 255, 1)');
+            drawTrajectory(trajectories.rearLeft, 'rgba(255, 165, 0, 1)');
+            drawTrajectory(trajectories.rearRight, 'rgba(0, 255, 0, 1)');
+        }
+
+        function drawUI() {
+            // Editor mode indicator
+            if (editorMode) {
+                ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+                ctx.fillRect(0, 0, canvas.width, 30);
+                ctx.fillStyle = 'black';
+                ctx.font = 'bold 16px Arial';
+                ctx.fillText('EDITOR MODE', 10, 20);
+                return; // Don't show game UI in editor mode
+            }
+
+            // Speed and steering display
+            ctx.fillStyle = 'white';
+            ctx.font = '14px Arial';
+            ctx.fillText(`Speed: ${Math.abs(car.velocity).toFixed(2)}`, 10, 20);
+            const steeringDegrees = (car.steeringAngle * 180 / Math.PI).toFixed(1);
+            ctx.fillText(`Steering: ${steeringDegrees}°`, 10, 40);
+
+            // Trajectory legend
+            const legendX = canvas.width - 150;
+            const legendY = 20;
+            ctx.font = '12px Arial';
+            ctx.fillStyle = 'white';
+            ctx.fillText('Wheel Trajectories:', legendX, legendY);
+
+            const colors = [
+                { name: 'Front Left', color: 'rgb(255, 0, 0)' },
+                { name: 'Front Right', color: 'rgb(0, 0, 255)' },
+                { name: 'Rear Left', color: 'rgb(255, 165, 0)' },
+                { name: 'Rear Right', color: 'rgb(0, 255, 0)' }
+            ];
+
+            colors.forEach((item, i) => {
+                const y = legendY + 20 + i * 18;
+                ctx.strokeStyle = item.color;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(legendX, y);
+                ctx.lineTo(legendX + 20, y);
+                ctx.stroke();
+                ctx.fillStyle = 'white';
+                ctx.fillText(item.name, legendX + 25, y + 4);
+            });
+
+            // Game over message
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#e74c3c';
+                ctx.font = 'bold 48px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 20);
+
+                ctx.fillStyle = 'white';
+                ctx.font = '24px Arial';
+                ctx.fillText('Press R to Restart', canvas.width / 2, canvas.height / 2 + 30);
+                ctx.textAlign = 'left';
+            }
+
+            // Perfect parking message
+            if (parked) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#27ae60';
+                ctx.font = 'bold 48px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('🎉 PERFECT PARKING! 🎉', canvas.width / 2, canvas.height / 2 - 20);
+
+                ctx.fillStyle = 'white';
+                ctx.font = '24px Arial';
+                ctx.fillText('Press R to Restart', canvas.width / 2, canvas.height / 2 + 30);
+                ctx.textAlign = 'left';
+            }
+        }
+
+        function draw() {
+            drawBackground();
+            drawObstacles();
+            drawParkingTarget();
+            drawStartPosition();
+
+            // Only draw car and trajectories in play mode
+            if (!editorMode) {
+                drawCar();
+                drawTrajectories();
+            }
+
+            drawUI();
+        }
+
+        // ===== EDITOR FUNCTIONS =====
+
+        function initEditor() {
+            // Populate level select
+            const levelSelect = document.getElementById('levelSelect');
+            levelSelect.innerHTML = '<option value="custom">Custom Level</option>';
+
+            // Add predefined levels
+            for (let key in predefinedLevels) {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = predefinedLevels[key].name;
+                levelSelect.appendChild(opt);
+            }
+
+            // Load custom levels from localStorage
+            const savedLevels = getSavedLevels();
+            for (let levelName in savedLevels) {
+                const opt = document.createElement('option');
+                opt.value = 'saved_' + levelName;
+                opt.textContent = levelName + ' (Custom)';
+                levelSelect.appendChild(opt);
+            }
+
+            // Set initial selection to the currently loaded level
+            levelSelect.value = currentLevelKey;
+
+            // Toggle editor button
+            document.getElementById('toggleEditor').addEventListener('click', () => {
+                if (editorMode) {
+                    // Exiting editor mode - start the level
+                    testLevel();
+                } else {
+                    // Entering editor mode
+                    editorMode = true;
+                    document.getElementById('editorPanel').classList.add('active');
+                }
+            });
+
+            // Canvas mouse events for selecting and dragging objects
+            canvas.addEventListener('mousedown', (e) => {
+                if (!editorMode) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                selectedObject = null;
+
+                // Check click on objects
+                for (let i = level.length - 1; i >= 0; i--) {
+                    const obj = level[i];
+                    let hit = false;
+
+                    if (obj.type === 'obstacleSquare') {
+                        hit = pointInRotatedRect({x, y}, obj.posX, obj.posY, obj.size, obj.size, obj.rotation * Math.PI / 180);
+                    } else if (obj.type === 'obstacleCar') {
+                        // Car obstacle hitbox
+                        const w = 40;
+                        const h = 70;
+                        const rearOffset = 10;
+                        const angle = obj.rotation * Math.PI / 180;
+
+                        const dx = x - obj.posX;
+                        const dy = y - obj.posY;
+                        const localX = dx * Math.cos(-angle) - dy * Math.sin(-angle);
+                        const localY = dx * Math.sin(-angle) + dy * Math.cos(-angle);
+
+                        hit = localX >= -w / 2 && localX <= w / 2 &&
+                              localY >= -h + rearOffset && localY <= rearOffset;
+                    } else if (obj.type === 'start') {
+                        // Start position uses rear offset - transform point to local space and check bounds
+                        const w = 40;
+                        const h = 70;
+                        const rearOffset = 10;
+                        const angle = obj.rotation * Math.PI / 180;
+
+                        // Transform click point to object's local coordinate system
+                        const dx = x - obj.posX;
+                        const dy = y - obj.posY;
+                        const localX = dx * Math.cos(-angle) - dy * Math.sin(-angle);
+                        const localY = dx * Math.sin(-angle) + dy * Math.cos(-angle);
+
+                        // Check if point is inside the rectangle (drawn from -w/2, -h+rearOffset)
+                        hit = localX >= -w / 2 && localX <= w / 2 &&
+                              localY >= -h + rearOffset && localY <= rearOffset;
+                    } else if (obj.type === 'finish') {
+                        const w = obj.width || 50;
+                        const h = obj.height || 80;
+                        hit = pointInRotatedRect({x, y}, obj.posX, obj.posY, w, h, obj.rotation * Math.PI / 180);
+                    }
+
+                    if (hit) {
+                        selectedObject = i;
+                        isDragging = true;
+                        break;
+                    }
+                }
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!editorMode || !isDragging || selectedObject === null) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const obj = level[selectedObject];
+                if (obj) {
+                    obj.posX = x;
+                    obj.posY = y;
+                }
+            });
+
+            canvas.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                isDragging = false;
+            });
+        }
+
+        function getSavedLevels() {
+            const saved = localStorage.getItem('parkingLevels');
+            return saved ? JSON.parse(saved) : {};
+        }
+
+        function saveLevel() {
+            const levelName = document.getElementById('levelName').value.trim();
+            if (!levelName) {
+                alert('Please enter a level name');
+                return;
+            }
+
+            const levels = getSavedLevels();
+            levels[levelName] = JSON.parse(JSON.stringify(level));
+            localStorage.setItem('parkingLevels', JSON.stringify(levels));
+
+            alert('Level saved!');
+            initEditor(); // Refresh level list
+        }
+
+        function deleteLevel() {
+            const levelName = document.getElementById('levelName').value.trim();
+            if (!levelName) {
+                alert('Please enter a level name to delete');
+                return;
+            }
+
+            const levels = getSavedLevels();
+            if (levels[levelName]) {
+                delete levels[levelName];
+                localStorage.setItem('parkingLevels', JSON.stringify(levels));
+                alert('Level deleted!');
+                initEditor(); // Refresh level list
+            } else {
+                alert('Level not found');
+            }
+        }
+
+        async function loadLevelFromFile(filename) {
+            try {
+                const response = await fetch(filename, {
+                    cache: 'no-store'
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error loading level:', error);
+                alert('Failed to load level: ' + filename + '\nMake sure you are running this with a web server (not file://)');
+                return null;
+            }
+        }
+
+        async function loadSelectedLevel() {
+            const select = document.getElementById('levelSelect');
+            const value = select.value;
+
+            if (value === 'custom') {
+                return;
+            }
+
+            if (value.startsWith('saved_')) {
+                const levelName = value.substring(6);
+                const levels = getSavedLevels();
+                if (levels[levelName]) {
+                    level = JSON.parse(JSON.stringify(levels[levelName]));
+                    currentLevel = level;
+                    currentLevelKey = value;
+                    loadLevelData();
+
+                    // Exit editor mode if active and start the level
+                    if (editorMode) {
+                        testLevel();
+                    }
+                }
+            } else {
+                if (predefinedLevels[value]) {
+                    const data = await loadLevelFromFile(predefinedLevels[value].file);
+                    if (data) {
+                        level = JSON.parse(JSON.stringify(data));
+                        currentLevel = level;
+                        currentLevelKey = value;
+                        loadLevelData();
+
+                        // Exit editor mode if active and start the level
+                        if (editorMode) {
+                            testLevel();
+                        }
+                    }
+                }
+            }
+        }
+
+        function exportLevel() {
+            const json = JSON.stringify(level, null, 2);
+            const textarea = document.getElementById('importArea');
+            textarea.value = json;
+            textarea.select();
+            document.execCommand('copy');
+            alert('Level JSON copied to clipboard!');
+        }
+
+        function importLevel() {
+            const textarea = document.getElementById('importArea');
+            try {
+                const imported = JSON.parse(textarea.value);
+                if (Array.isArray(imported)) {
+                    level = imported;
+                    currentLevel = level;
+                    loadLevelData();
+                    alert('Level imported successfully!');
+                } else {
+                    alert('Invalid level format');
+                }
+            } catch (e) {
+                alert('Invalid JSON: ' + e.message);
+            }
+        }
+
+        function addObject() {
+            const type = document.getElementById('objectType').value;
+            const newObj = {
+                type: type,
+                posX: canvas.width / 2,
+                posY: canvas.height / 2,
+                rotation: 0
+            };
+
+            if (type === 'obstacleSquare') {
+                newObj.size = 50;
+            } else if (type === 'obstacleCar') {
+                // Car obstacles don't need extra properties
+            } else if (type === 'finish') {
+                newObj.width = 50;
+                newObj.height = 80;
+            }
+
+            // Remove existing start/finish if adding new one
+            if (type === 'start' || type === 'finish') {
+                level = level.filter(obj => obj.type !== type);
+            }
+
+            level.push(newObj);
+            selectedObject = level.length - 1;
+        }
+
+        function clearLevel() {
+            if (confirm('Clear all objects?')) {
+                level = [];
+                selectedObject = null;
+            }
+        }
+
+        function testLevel() {
+            editorMode = false;
+            document.getElementById('editorPanel').classList.remove('active');
+            selectedObject = null;
+            loadLevelData();
+            resetGame();
+        }
+
+        function loadLevelData() {
+            // Reload start, finish, obstacles from level
+            startPos = level.find(item => item.type === 'start');
+            finishPos = level.find(item => item.type === 'finish');
+            obstacles = level.filter(item => item.type === 'obstacleSquare');
+
+            if (startPos) {
+                car.x = startPos.posX;
+                car.y = startPos.posY;
+                car.angle = startPos.rotation * Math.PI / 180;
+            }
+
+            if (finishPos) {
+                target.x = finishPos.posX;
+                target.y = finishPos.posY;
+                target.width = finishPos.width;
+                target.height = finishPos.height;
+                target.rotation = finishPos.rotation * Math.PI / 180;
+            }
+
+            resetGame();
+        }
+
+        // ===== END EDITOR FUNCTIONS =====
+
+        function gameLoop() {
+            update();
+            draw();
+
+            // Draw editor overlays
+            if (editorMode && selectedObject !== null) {
+                const obj = level[selectedObject];
+                if (obj) {
+                    ctx.save();
+                    ctx.translate(obj.posX, obj.posY);
+                    ctx.rotate(obj.rotation * Math.PI / 180);
+
+                    let w, h, offsetX = 0, offsetY = 0;
+
+                    if (obj.type === 'start' || obj.type === 'obstacleCar') {
+                        // Start position and car obstacle use rear offset
+                        w = 40;
+                        h = 70;
+                        const rearOffset = 10;
+                        offsetX = -w / 2;
+                        offsetY = -h + rearOffset;
+                    } else if (obj.type === 'finish') {
+                        w = obj.width || 50;
+                        h = obj.height || 80;
+                        offsetX = -w / 2;
+                        offsetY = -h / 2;
+                    } else if (obj.type === 'obstacleSquare') {
+                        w = obj.size;
+                        h = obj.size;
+                        offsetX = -w / 2;
+                        offsetY = -h / 2;
+                    }
+
+                    ctx.strokeStyle = 'yellow';
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([5, 5]);
+                    ctx.strokeRect(offsetX, offsetY, w, h);
+                    ctx.setLineDash([]);
+
+                    ctx.restore();
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Editor keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (!editorMode || selectedObject === null) return;
+
+            const obj = level[selectedObject];
+            if (!obj) return;
+
+            const moveSpeed = e.shiftKey ? 10 : 1;
+
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                obj.posY -= moveSpeed;
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                obj.posY += moveSpeed;
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                obj.posX -= moveSpeed;
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                obj.posX += moveSpeed;
+            } else if (e.key === 'q' || e.key === 'Q') {
+                e.preventDefault();
+                obj.rotation = (obj.rotation - 5) % 360;
+            } else if (e.key === 'e' || e.key === 'E') {
+                e.preventDefault();
+                obj.rotation = (obj.rotation + 5) % 360;
+            } else if (e.key === 'c' || e.key === 'C') {
+                e.preventDefault();
+                // Copy the selected object
+                const copiedObj = JSON.parse(JSON.stringify(obj));
+                // Offset the copy slightly so it's visible
+                copiedObj.posX += 20;
+                copiedObj.posY += 20;
+                level.push(copiedObj);
+                selectedObject = level.length - 1;
+            } else if (e.key === 'd' || e.key === 'D' || e.key === 'Delete') {
+                e.preventDefault();
+                level.splice(selectedObject, 1);
+                selectedObject = null;
+            } else if (e.key === '+' || e.key === '=') {
+                e.preventDefault();
+                if (obj.size) obj.size += 5;
+                if (obj.width) obj.width += 5;
+                if (obj.height) obj.height += 5;
+            } else if (e.key === '-' || e.key === '_') {
+                e.preventDefault();
+                if (obj.size) obj.size = Math.max(10, obj.size - 5);
+                if (obj.width) obj.width = Math.max(10, obj.width - 5);
+                if (obj.height) obj.height = Math.max(10, obj.height - 5);
+            }
+        });
+
+        // Start the game
+        async function initGame() {
+            // Load level1 by default
+            const [lvlKey, lvl] = Object.entries(predefinedLevels)[0]
+            const data = await loadLevelFromFile(lvl.file);
+            if (data) {
+                level = JSON.parse(JSON.stringify(data));
+                currentLevel = level;
+                currentLevelKey = lvlKey;
+                loadLevelData();
+            }
+            initEditor();
+            gameLoop();
+        }
+
+        initGame();
+    </script>
+</body>
+</html>

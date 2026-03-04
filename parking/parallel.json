@@ -1,0 +1,164 @@
+[
+  {
+    "type": "start",
+    "posX": 416,
+    "posY": 519.5,
+    "rotation": -10
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 486,
+    "posY": 225.5,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 485,
+    "posY": 149.5,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 487,
+    "posY": 414.5,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 486,
+    "posY": 491.5,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 487,
+    "posY": 571.5,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 485,
+    "posY": 65.5,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 323,
+    "posY": 70.5,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 324,
+    "posY": 150.5,
+    "rotation": 0
+  },
+  {
+    "type": "finish",
+    "posX": 488,
+    "posY": 296.5,
+    "rotation": 0,
+    "width": 50,
+    "height": 80
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 325,
+    "posY": 233.5,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 328,
+    "posY": 319.5,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 330,
+    "posY": 406.5,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 332,
+    "posY": 489.5,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleCar",
+    "posX": 333,
+    "posY": 571.5,
+    "rotation": 0
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 591,
+    "posY": 301.5,
+    "rotation": 0,
+    "size": 150
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 591,
+    "posY": 169.5,
+    "rotation": 0,
+    "size": 150
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 590,
+    "posY": 70.5,
+    "rotation": 0,
+    "size": 150
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 593,
+    "posY": 417.5,
+    "rotation": 0,
+    "size": 150
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 594,
+    "posY": 535.5,
+    "rotation": 0,
+    "size": 150
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 228,
+    "posY": 556.5,
+    "rotation": 0,
+    "size": 150
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 229,
+    "posY": 422.5,
+    "rotation": 0,
+    "size": 150
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 226,
+    "posY": 271.5,
+    "rotation": 0,
+    "size": 150
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 225,
+    "posY": 193.5,
+    "rotation": 0,
+    "size": 150
+  },
+  {
+    "type": "obstacleSquare",
+    "posX": 224,
+    "posY": 61.5,
+    "rotation": 0,
+    "size": 150
+  }
+]
