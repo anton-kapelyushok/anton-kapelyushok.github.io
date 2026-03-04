@@ -382,6 +382,12 @@
         let parked = false;
         let gameOver = false;
 
+        // Timer and death count tracking
+        let greenTimer = 0;      // Total time spent on map (milliseconds)
+        let whiteTimer = 0;      // Current attempt time (milliseconds)
+        let deathCount = 0;      // Number of deaths
+        let lastFrameTime = Date.now();
+
         // Editor state
         let editorMode = false;
         let selectedObject = null;
@@ -420,6 +426,10 @@
                 keys.right = true;
             }
             if (e.key === 'r' || e.key === 'R') {
+                // Count as death if manually resetting (not already in gameOver state)
+                if (!gameOver && !parked && !editorMode) {
+                    deathCount++;
+                }
                 resetGame();
             }
             if (e.key === 'b' || e.key === 'B') {
@@ -505,6 +515,10 @@
             car.height = selectedCarModel.height;
             car.wheelbase = selectedCarModel.wheelbase;
 
+            // Reset green timer and death count when changing cars
+            greenTimer = 0;
+            deathCount = 0;
+
             // Reset the game with new car dimensions
             resetGame();
         }
@@ -515,8 +529,19 @@
             car.angle = startPos.rotation * Math.PI / 180;
             car.velocity = 0;
             car.steeringAngle = 0;
+
+            // If completing the map (parked), reset green timer and death count
+            if (parked) {
+                greenTimer = 0;
+                deathCount = 0;
+            }
+
             parked = false;
             gameOver = false;
+
+            // Reset white timer (current attempt)
+            whiteTimer = 0;
+            lastFrameTime = Date.now();
 
             // Clear trajectories
             trajectories.frontLeft = [];
@@ -555,6 +580,14 @@
 
         function update() {
             if (parked || gameOver) return;
+
+            // Update timers
+            const currentTime = Date.now();
+            const deltaTime = currentTime - lastFrameTime;
+            lastFrameTime = currentTime;
+
+            greenTimer += deltaTime;
+            whiteTimer += deltaTime;
 
             // Calculate speed-dependent max steering angle
             // At low speeds (< 2.5), full steering available
@@ -625,6 +658,7 @@
                 // Collision detected - game over
                 gameOver = true;
                 car.velocity = 0;
+                deathCount++;
 
                 // DEBUG: Log collision details
                 console.log('=== COLLISION DETECTED ===');
@@ -1256,6 +1290,14 @@
             drawTrajectory(trajectories.rearRight, 'rgba(100, 255, 100, 1)');
         }
 
+        function formatTime(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const ms = Math.floor((milliseconds % 1000) / 10);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+        }
+
         function drawUI() {
             // Editor mode indicator
             if (editorMode) {
@@ -1275,6 +1317,18 @@
             const steeringDegrees = (car.steeringAngle * 180 / Math.PI).toFixed(1);
             ctx.fillText(`Steering: ${steeringDegrees}°`, 10, 60);
 
+            // Timer and death count display (top right)
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#2ecc71'; // Green color for total timer
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText(`Total: ${formatTime(greenTimer)}`, canvas.width - 10, 20);
+
+            ctx.fillStyle = 'white'; // White color for attempt timer
+            ctx.fillText(`Attempt: ${formatTime(whiteTimer)}`, canvas.width - 10, 40);
+
+            ctx.fillText(`Deaths: ${deathCount}`, canvas.width - 10, 60);
+            ctx.textAlign = 'left';
+
 
             // Game over message
             if (gameOver) {
@@ -1284,11 +1338,30 @@
                 ctx.fillStyle = '#e74c3c';
                 ctx.font = 'bold 48px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 20);
+                ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 100);
+
+                // Get level name
+                let levelName = 'Custom Level';
+                if (currentLevelKey.startsWith('saved_')) {
+                    levelName = currentLevelKey.substring(6);
+                } else if (predefinedLevels[currentLevelKey]) {
+                    levelName = predefinedLevels[currentLevelKey].name;
+                }
+
+                ctx.fillStyle = '#bdc3c7';
+                ctx.font = '18px Arial';
+                ctx.fillText(`${levelName} - ${selectedCarModel.name}`, canvas.width / 2, canvas.height / 2 - 60);
 
                 ctx.fillStyle = 'white';
+                ctx.font = '20px Arial';
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillText(`Total Time: ${formatTime(greenTimer)}`, canvas.width / 2, canvas.height / 2 - 20);
+                ctx.fillStyle = 'white';
+                ctx.fillText(`Attempt Time: ${formatTime(whiteTimer)}`, canvas.width / 2, canvas.height / 2 + 10);
+                ctx.fillText(`Deaths: ${deathCount}`, canvas.width / 2, canvas.height / 2 + 40);
+
                 ctx.font = '24px Arial';
-                ctx.fillText('Press R to Restart', canvas.width / 2, canvas.height / 2 + 30);
+                ctx.fillText('Press R to Restart', canvas.width / 2, canvas.height / 2 + 80);
                 ctx.textAlign = 'left';
             }
 
@@ -1300,11 +1373,29 @@
                 ctx.fillStyle = '#27ae60';
                 ctx.font = 'bold 48px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText('🎉 PERFECT PARKING! 🎉', canvas.width / 2, canvas.height / 2 - 20);
+                ctx.fillText('🎉 PERFECT PARKING! 🎉', canvas.width / 2, canvas.height / 2 - 100);
 
+                // Get level name
+                let levelName = 'Custom Level';
+                if (currentLevelKey.startsWith('saved_')) {
+                    levelName = currentLevelKey.substring(6);
+                } else if (predefinedLevels[currentLevelKey]) {
+                    levelName = predefinedLevels[currentLevelKey].name;
+                }
+
+                ctx.fillStyle = '#bdc3c7';
+                ctx.font = '18px Arial';
+                ctx.fillText(`${levelName} - ${selectedCarModel.name}`, canvas.width / 2, canvas.height / 2 - 60);
+
+                ctx.font = '20px Arial';
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillText(`Total Time: ${formatTime(greenTimer)}`, canvas.width / 2, canvas.height / 2 - 20);
                 ctx.fillStyle = 'white';
+                ctx.fillText(`Attempt Time: ${formatTime(whiteTimer)}`, canvas.width / 2, canvas.height / 2 + 10);
+                ctx.fillText(`Deaths: ${deathCount}`, canvas.width / 2, canvas.height / 2 + 40);
+
                 ctx.font = '24px Arial';
-                ctx.fillText('Press R to Restart', canvas.width / 2, canvas.height / 2 + 30);
+                ctx.fillText('Press R to Restart', canvas.width / 2, canvas.height / 2 + 80);
                 ctx.textAlign = 'left';
             }
         }
@@ -1545,6 +1636,10 @@
             if (value === 'custom') {
                 return;
             }
+
+            // Reset green timer and death count when changing levels
+            greenTimer = 0;
+            deathCount = 0;
 
             if (value.startsWith('saved_')) {
                 const levelName = value.substring(6);
