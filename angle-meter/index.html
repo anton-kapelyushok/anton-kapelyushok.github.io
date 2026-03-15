@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angle Measurement Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            overflow: hidden;
+        }
+        #container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #canvas {
+            border: 2px solid #444;
+            cursor: crosshair;
+            background: #2a2a2a;
+        }
+        #instructions {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 280px;
+            font-size: 13px;
+        }
+        #angle-display {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 120, 215, 0.9);
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 20px;
+            font-weight: bold;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="instructions">
+            <strong>Instructions:</strong><br>
+            1. Paste an image (Ctrl/Cmd+V)<br>
+            2. Click 3 times to place anchor points<br>
+            3. Angle will be calculated after 3rd click<br>
+            4. Backspace: remove last anchor<br>
+            5. ESC: remove all anchors
+        </div>
+        <div id="angle-display"></div>
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const angleDisplay = document.getElementById('angle-display');
+
+        let image = null;
+        let anchors = [];
+        let mousePos = { x: 0, y: 0 };
+        let imageOffset = { x: 0, y: 0 };
+
+        // Set canvas size based on window size
+        function resizeCanvas() {
+            // Smoothly transition margin from 5% on small screens to 10% on large screens
+            const smallScreen = 600;
+            const largeScreen = 1400;
+
+            // Use the larger dimension to determine margin percentage
+            const screenSize = Math.max(window.innerWidth, window.innerHeight);
+            const sizeFactor = Math.max(0, Math.min(1,
+                (screenSize - smallScreen) / (largeScreen - smallScreen)
+            ));
+            const marginPercent = 0.05 + sizeFactor * 0.05;
+
+            const marginX = Math.max(window.innerWidth * marginPercent, 10);
+            const marginY = Math.max(window.innerHeight * marginPercent, 10);
+
+            const maxWidth = window.innerWidth - marginX * 2;
+            const maxHeight = window.innerHeight - marginY * 2;
+
+            // Smooth aspect ratio between 2/3 and 3/2
+            const screenAspectRatio = maxWidth / maxHeight;
+            const minAspect = 2 / 3;
+            const maxAspect = 3 / 2;
+            const aspectRatio = Math.max(minAspect, Math.min(maxAspect, screenAspectRatio));
+
+            let width = maxWidth;
+            let height = width / aspectRatio;
+
+            if (height > maxHeight) {
+                height = maxHeight;
+                width = height * aspectRatio;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            // Redraw if image exists
+            if (image) {
+                const scaleX = canvas.width / image.width;
+                const scaleY = canvas.height / image.height;
+                const scale = Math.min(scaleX, scaleY);
+
+                const scaledWidth = image.width * scale;
+                const scaledHeight = image.height * scale;
+
+                imageOffset.x = (canvas.width - scaledWidth) / 2;
+                imageOffset.y = (canvas.height - scaledHeight) / 2;
+                imageOffset.scale = scale;
+
+                draw();
+            }
+        }
+
+        // Initial resize
+        resizeCanvas();
+
+        // Resize on window resize
+        window.addEventListener('resize', resizeCanvas);
+
+        // Handle paste event
+        document.addEventListener('paste', (e) => {
+            const items = e.clipboardData.items;
+            for (let item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            image = img;
+
+                            // Calculate scale to fit image to canvas
+                            const scaleX = canvas.width / img.width;
+                            const scaleY = canvas.height / img.height;
+                            const scale = Math.min(scaleX, scaleY);
+
+                            // Calculate scaled dimensions
+                            const scaledWidth = img.width * scale;
+                            const scaledHeight = img.height * scale;
+
+                            // Center the scaled image
+                            imageOffset.x = (canvas.width - scaledWidth) / 2;
+                            imageOffset.y = (canvas.height - scaledHeight) / 2;
+                            imageOffset.scale = scale;
+
+                            anchors = [];
+                            draw();
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(blob);
+                    break;
+                }
+            }
+        });
+
+        // Track mouse position
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mousePos.x = e.clientX - rect.left;
+            mousePos.y = e.clientY - rect.top;
+            if (image && anchors.length > 0 && anchors.length < 3) {
+                draw();
+            }
+        });
+
+        // Handle clicks
+        canvas.addEventListener('click', (e) => {
+            if (!image) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (anchors.length === 3) {
+                // Restart process if all three anchors are already set
+                anchors = [];
+                angleDisplay.style.display = 'none';
+            }
+
+            anchors.push({ x, y });
+
+            if (anchors.length === 3) {
+                calculateAngle();
+            }
+
+            draw();
+        });
+
+        // Handle keyboard
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace') {
+                e.preventDefault();
+                if (anchors.length > 0) {
+                    anchors.pop();
+                    if (anchors.length < 3) {
+                        angleDisplay.style.display = 'none';
+                    }
+                    draw();
+                }
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                if (anchors.length > 0) {
+                    anchors = [];
+                    angleDisplay.style.display = 'none';
+                    draw();
+                }
+            }
+        });
+
+        // Calculate angle between three points
+        function calculateAngle() {
+            if (anchors.length !== 3) return;
+
+            const [p1, p2, p3] = anchors;
+
+            // Vectors from p2 to p1 and p2 to p3
+            const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
+            const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
+
+            // Dot product
+            const dot = v1.x * v2.x + v1.y * v2.y;
+
+            // Magnitudes
+            const mag1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
+            const mag2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
+
+            // Angle in radians, then convert to degrees
+            const angleRad = Math.acos(dot / (mag1 * mag2));
+            const angleDeg = angleRad * (180 / Math.PI);
+
+            // Display angle
+            angleDisplay.textContent = `Angle: ${angleDeg.toFixed(2)}°`;
+            angleDisplay.style.display = 'block';
+        }
+
+        // Draw everything
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw image
+            if (image) {
+                const scale = imageOffset.scale || 1;
+                ctx.drawImage(
+                    image,
+                    imageOffset.x,
+                    imageOffset.y,
+                    image.width * scale,
+                    image.height * scale
+                );
+            }
+
+            // Draw anchors and lines
+            if (anchors.length > 0) {
+                // Draw line from first anchor to mouse (if only 1 anchor)
+                if (anchors.length === 1) {
+                    ctx.strokeStyle = '#00ff00';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(anchors[0].x, anchors[0].y);
+                    ctx.lineTo(mousePos.x, mousePos.y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+
+                // Draw line from second anchor to mouse (if 2 anchors)
+                if (anchors.length === 2) {
+                    // Line from anchor 1 to anchor 2
+                    ctx.strokeStyle = '#00ff00';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(anchors[0].x, anchors[0].y);
+                    ctx.lineTo(anchors[1].x, anchors[1].y);
+                    ctx.stroke();
+
+                    // Line from anchor 2 to mouse
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(anchors[1].x, anchors[1].y);
+                    ctx.lineTo(mousePos.x, mousePos.y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+
+                // Draw all lines if 3 anchors
+                if (anchors.length === 3) {
+                    ctx.strokeStyle = '#00ff00';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(anchors[0].x, anchors[0].y);
+                    ctx.lineTo(anchors[1].x, anchors[1].y);
+                    ctx.lineTo(anchors[2].x, anchors[2].y);
+                    ctx.stroke();
+                }
+
+                // Draw anchor points
+                anchors.forEach((anchor, index) => {
+                    ctx.fillStyle = index === 1 ? '#ff0000' : '#00ff00';
+                    ctx.beginPath();
+                    ctx.arc(anchor.x, anchor.y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Draw anchor label
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '14px Arial';
+                    ctx.fillText(`${index + 1}`, anchor.x + 10, anchor.y - 10);
+                });
+            }
+        }
+
+        // Initial draw
+        draw();
+    </script>
+</body>
+</html>
