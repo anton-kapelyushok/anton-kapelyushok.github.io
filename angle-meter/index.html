@@ -29,6 +29,9 @@
             cursor: crosshair;
             background: #2a2a2a;
         }
+        #canvas.no-image {
+            cursor: pointer;
+        }
         #instructions {
             position: absolute;
             top: 10px;
@@ -50,30 +53,102 @@
             font-weight: bold;
             display: none;
         }
+        #upload-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 120, 215, 0.9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #upload-btn:hover {
+            background: rgba(0, 140, 255, 1);
+        }
+        #file-input {
+            display: none;
+        }
+        #placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #aaa;
+            pointer-events: none;
+            user-select: none;
+        }
+        #placeholder.hidden {
+            display: none;
+        }
+        .upload-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        .upload-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+        .upload-text {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #aaa;
+        }
+        .upload-subtext {
+            font-size: 14px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
     <div id="container">
         <div id="instructions">
-            <strong>Instructions:</strong><br>
-            1. Paste an image (Ctrl/Cmd+V)<br>
-            2. Click 3 times to place anchor points<br>
-            3. Angle will be calculated after 3rd click<br>
-            4. Backspace: remove last anchor<br>
-            5. ESC: remove all anchors
+            <strong>How to measure:</strong><br>
+            • Click 3 points to form an angle<br>
+            • Hold Shift to snap to 5°<br>
+            <br>
+            <strong>Controls:</strong><br>
+            Backspace - Remove last point<br>
+            ESC - Clear all points
         </div>
         <div id="angle-display"></div>
-        <canvas id="canvas"></canvas>
+        <canvas id="canvas" class="no-image"></canvas>
+        <div id="placeholder">
+            <div class="upload-icon">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Image frame -->
+                    <rect x="10" y="20" width="80" height="60" fill="none" stroke="#888" stroke-width="3" rx="3"/>
+                    <!-- Mountain/landscape -->
+                    <polyline points="10,65 30,45 50,55 70,35 90,50 90,80 10,80" fill="#666" stroke="none"/>
+                    <!-- Sun/circle -->
+                    <circle cx="30" cy="35" r="8" fill="#888"/>
+                </svg>
+            </div>
+            <div class="upload-text">Click to upload image</div>
+            <div class="upload-subtext">or paste with Ctrl/Cmd+V</div>
+        </div>
+        <input type="file" id="file-input" accept="image/*">
+        <button id="upload-btn">Upload Image</button>
     </div>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const angleDisplay = document.getElementById('angle-display');
+        const fileInput = document.getElementById('file-input');
+        const uploadBtn = document.getElementById('upload-btn');
+        const placeholder = document.getElementById('placeholder');
 
         let image = null;
         let anchors = [];
-        let mousePos = { x: 0, y: 0 };
+        let mousePos = { x: 0, y: 0, shiftKey: false };
         let imageOffset = { x: 0, y: 0 };
 
         // Set canvas size based on window size
@@ -135,38 +210,58 @@
         // Resize on window resize
         window.addEventListener('resize', resizeCanvas);
 
+        // Function to load an image
+        function loadImage(file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    image = img;
+
+                    // Calculate scale to fit image to canvas
+                    const scaleX = canvas.width / img.width;
+                    const scaleY = canvas.height / img.height;
+                    const scale = Math.min(scaleX, scaleY);
+
+                    // Calculate scaled dimensions
+                    const scaledWidth = img.width * scale;
+                    const scaledHeight = img.height * scale;
+
+                    // Center the scaled image
+                    imageOffset.x = (canvas.width - scaledWidth) / 2;
+                    imageOffset.y = (canvas.height - scaledHeight) / 2;
+                    imageOffset.scale = scale;
+
+                    anchors = [];
+                    placeholder.classList.add('hidden');
+                    canvas.classList.remove('no-image');
+                    draw();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Handle upload button click
+        uploadBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Handle file input change
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                loadImage(file);
+            }
+        });
+
         // Handle paste event
         document.addEventListener('paste', (e) => {
             const items = e.clipboardData.items;
             for (let item of items) {
                 if (item.type.indexOf('image') !== -1) {
                     const blob = item.getAsFile();
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            image = img;
-
-                            // Calculate scale to fit image to canvas
-                            const scaleX = canvas.width / img.width;
-                            const scaleY = canvas.height / img.height;
-                            const scale = Math.min(scaleX, scaleY);
-
-                            // Calculate scaled dimensions
-                            const scaledWidth = img.width * scale;
-                            const scaledHeight = img.height * scale;
-
-                            // Center the scaled image
-                            imageOffset.x = (canvas.width - scaledWidth) / 2;
-                            imageOffset.y = (canvas.height - scaledHeight) / 2;
-                            imageOffset.scale = scale;
-
-                            anchors = [];
-                            draw();
-                        };
-                        img.src = event.target.result;
-                    };
-                    reader.readAsDataURL(blob);
+                    loadImage(blob);
                     break;
                 }
             }
@@ -177,6 +272,7 @@
             const rect = canvas.getBoundingClientRect();
             mousePos.x = e.clientX - rect.left;
             mousePos.y = e.clientY - rect.top;
+            mousePos.shiftKey = e.shiftKey;
             if (image && anchors.length > 0 && anchors.length < 3) {
                 draw();
             }
@@ -184,16 +280,26 @@
 
         // Handle clicks
         canvas.addEventListener('click', (e) => {
-            if (!image) return;
+            if (!image) {
+                fileInput.click();
+                return;
+            }
 
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
 
             if (anchors.length === 3) {
                 // Restart process if all three anchors are already set
                 anchors = [];
                 angleDisplay.style.display = 'none';
+            }
+
+            // Apply snapping if shift is pressed and we have a previous anchor
+            if (anchors.length > 0) {
+                const snapped = snapToAngle(anchors[anchors.length - 1], { x, y }, e.shiftKey);
+                x = snapped.x;
+                y = snapped.y;
             }
 
             anchors.push({ x, y });
@@ -225,6 +331,35 @@
                 }
             }
         });
+
+        // Snap position to nearest 5-degree angle from anchor
+        function snapToAngle(anchor, target, shiftKey) {
+            if (!shiftKey) return target;
+
+            const dx = target.x - anchor.x;
+            const dy = target.y - anchor.y;
+
+            // Calculate angle in radians (atan2 gives angle from positive x-axis)
+            const angle = Math.atan2(dy, dx);
+
+            // Convert to degrees
+            const angleDeg = angle * (180 / Math.PI);
+
+            // Snap to nearest 5 degrees
+            const snappedAngleDeg = Math.round(angleDeg / 5) * 5;
+
+            // Convert back to radians
+            const snappedAngle = snappedAngleDeg * (Math.PI / 180);
+
+            // Calculate distance
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Calculate new position
+            return {
+                x: anchor.x + Math.cos(snappedAngle) * distance,
+                y: anchor.y + Math.sin(snappedAngle) * distance
+            };
+        }
 
         // Calculate angle between three points
         function calculateAngle() {
@@ -272,12 +407,13 @@
             if (anchors.length > 0) {
                 // Draw line from first anchor to mouse (if only 1 anchor)
                 if (anchors.length === 1) {
+                    const targetPos = snapToAngle(anchors[0], mousePos, mousePos.shiftKey);
                     ctx.strokeStyle = '#00ff00';
                     ctx.lineWidth = 2;
                     ctx.setLineDash([5, 5]);
                     ctx.beginPath();
                     ctx.moveTo(anchors[0].x, anchors[0].y);
-                    ctx.lineTo(mousePos.x, mousePos.y);
+                    ctx.lineTo(targetPos.x, targetPos.y);
                     ctx.stroke();
                     ctx.setLineDash([]);
                 }
@@ -293,10 +429,11 @@
                     ctx.stroke();
 
                     // Line from anchor 2 to mouse
+                    const targetPos = snapToAngle(anchors[1], mousePos, mousePos.shiftKey);
                     ctx.setLineDash([5, 5]);
                     ctx.beginPath();
                     ctx.moveTo(anchors[1].x, anchors[1].y);
-                    ctx.lineTo(mousePos.x, mousePos.y);
+                    ctx.lineTo(targetPos.x, targetPos.y);
                     ctx.stroke();
                     ctx.setLineDash([]);
                 }
