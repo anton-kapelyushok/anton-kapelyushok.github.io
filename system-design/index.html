@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f5ef">
+    <meta name="description" content="A system design interview workbench with capacity and availability calculators, speedrun splits, and a requirements checklist.">
+    <title>System Design cheatsheet</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232d5748'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-family='monospace' font-size='34' fill='%23eff5bc'%3Esd%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="./style.css">
+    <script type="module" src="./app.js"></script>
+</head>
+<body>
+    <div class="page">
+        <header class="topbar">
+            <a class="back-link" href="../"><span aria-hidden="true">↖</span> All experiments</a>
+            <span class="wordmark"><span class="status-dot"></span> THE INTERVIEW WORKBENCH</span>
+        </header>
+        <main>
+            <section class="intro" aria-labelledby="page-title">
+                <div>
+                    <p class="eyebrow">A LITTLE STRUCTURE. ROOM TO THINK.</p>
+                    <h1 id="page-title">System Design <em>cheatsheet.</em></h1>
+                    <p class="intro-copy">Get a feel for the numbers. Make time for the tradeoffs.</p>
+                </div>
+                <div class="intro-note"><span class="note-symbol" aria-hidden="true">↗</span><p>Estimate the scale.<br>Explain your assumptions.<br>Keep the conversation moving.</p></div>
+            </section>
+
+            <nav class="widget-nav" aria-label="Workbench widgets">
+                <a href="#capacity">Capacity</a><a href="#speedrun">Splits</a><a href="#availability">Availability</a><a href="#requirements">Requirements</a>
+            </nav>
+            <div class="workspace">
+                <section id="capacity" class="widget capacity" aria-labelledby="capacity-title">
+                    <div class="widget-heading">
+                        <div><p class="eyebrow">01 / SIZE IT UP</p><h2 id="capacity-title">Capacity calculator</h2></div>
+                        <span class="widget-icon" aria-hidden="true">×</span>
+                    </div>
+                    <p class="widget-description">Type the calculation. The units work themselves out.</p>
+                    <label class="expression-label" for="expression">Your calculation</label>
+                    <textarea id="expression" rows="3" maxlength="500" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="syntax-hint expression-error">100000 / day * 1 month * 200 bytes</textarea>
+                    <p id="syntax-hint" class="syntax-hint">Use numbers, units, + − * / ^ and parentheses. End with <code>in KB/year</code> to choose output units.</p>
+                    <p id="expression-error" class="error" role="status" hidden></p>
+                    <div class="expression-result" aria-live="polite" aria-atomic="true">
+                        <p class="eyebrow">RESULT</p>
+                        <output id="expression-result" for="expression">—</output>
+                        <p id="expression-detail">—</p>
+                    </div>
+                    <h3 class="subheading">Try a calculation</h3>
+                    <div class="expression-examples">
+                        <button type="button" data-expression="100000 / day * 1 month * 200 bytes"><span>Monthly storage</span><code>100000 / day * 1 month * 200 bytes</code><span aria-hidden="true">↗</span></button>
+                        <button type="button" data-expression="1M requests/day in rps"><span>Requests per second</span><code>1M requests/day in rps</code><span aria-hidden="true">↗</span></button>
+                        <button type="button" data-expression="1B * 2 KB"><span>A billion records</span><code>1B * 2 KB</code><span aria-hidden="true">↗</span></button>
+                        <button type="button" data-expression="1B bytes/month in KB/year"><span>Choose output units</span><code>1B bytes/month in KB/year</code><span aria-hidden="true">↗</span></button>
+                        <button type="button" data-expression="1M dau * 20 requests/user in rps"><span>From active users to traffic</span><code>1M dau * 20 requests/user in rps</code><span aria-hidden="true">↗</span></button>
+                    </div>
+                    <h3 class="subheading">A little notation goes a long way</h3>
+                    <dl class="notation-list">
+                        <div><dt>Numbers</dt><dd><code>1K</code> thousand · <code>1M</code> million · <code>1B</code> billion · <code>10^6</code> = <code>1M</code></dd></div>
+                        <div><dt>Counts</dt><dd><code>request(s)</code> · <code>event(s)</code> · <code>user(s)</code> · <code>unit(s)</code> — each equals <code>1</code>; optional labels for readability.</dd></div>
+                        <div><dt>Aliases</dt><dd><code>rps</code> = 1/second · <code>dau</code> = 1/day · <code>mau</code> = 1/month</dd></div>
+                        <div><dt>Data</dt><dd><code>bytes</code> · <code>KB</code> · <code>MB</code> · <code>GB</code> · <code>TB</code></dd></div>
+                        <div><dt>Time</dt><dd><code>second</code> · <code>minute</code> · <code>hour</code> · <code>day</code> · <code>month</code> · <code>year</code></dd></div>
+                        <div><dt>Output</dt><dd><code>expression in unit</code> — once, at the end. Use <code>GB</code> or <code>KB/year</code>. For rates, <code>in seconds</code> means per second; for durations, it means seconds. Explicit <code>in 1/second</code> also works. Put arithmetic before <code>in</code>.</dd></div>
+                    </dl>
+                    <p class="notation-note">Singular, plural, and uppercase all work: <code>month</code>, <code>months</code>, <code>month(s)</code>, <code>MONTH</code>. A month is 30 days; a year is 365 days. KB, MB, GB, and TB use powers of 1,000. <code>B</code> means billion; use <code>bytes</code> for bytes. DAU and MAU are treated as rates for capacity estimates; converting them does not estimate distinct active users.</p>
+                </section>
+
+                <section id="speedrun" class="widget speedrun" aria-labelledby="speedrun-title">
+                    <div class="widget-heading">
+                        <div><p class="eyebrow">02 / FIND YOUR PACE</p><h2 id="speedrun-title">Speedrun splits</h2></div>
+                        <span class="widget-icon timer-icon" aria-hidden="true">◷</span>
+                    </div>
+                    <p class="widget-description">A practice run for your next design interview.</p>
+                    <div class="session-options"><span id="session-label">Session length</span><div class="presets" role="group" aria-labelledby="session-label"><button data-minutes="30" type="button" aria-pressed="false">30m</button><button data-minutes="45" type="button" aria-pressed="true">45m</button><button data-minutes="60" type="button" aria-pressed="false">60m</button></div></div>
+                    <div class="timer-panel">
+                        <div class="timer-topline"><span id="run-status" class="run-status">READY WHEN YOU ARE</span><span id="pace-label">45:00 planned</span></div>
+                        <div class="timer-digits"><span id="elapsed">00:00</span><span id="total-budget">/ 45:00</span></div>
+                        <div id="run-progress" class="progress-track" role="progressbar" aria-label="Time used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-fill"></div></div>
+                        <p id="stage-hint">Who is it for? Define the core use cases and scope.</p>
+                        <div class="timer-actions"><button id="start-pause" class="primary-button" type="button">Start session <span aria-hidden="true">↗</span></button><button id="split" class="secondary-button" type="button" disabled>Split <span aria-hidden="true">→</span></button><button id="reset-run" class="reset-button" type="button" title="Reset session" aria-label="Reset session">↺</button></div>
+                    </div>
+                    <div class="split-heading"><h3>Your route</h3><span>Budget <span class="split-actual-heading">Actual</span></span></div>
+                    <ol id="stages" class="stage-list"></ol>
+                    <p id="split-feedback" class="split-feedback" role="status">Mark a split when you’re ready for the next stage.</p>
+                    <div class="personal-best"><div><span class="eyebrow">PERSONAL BEST · THIS ROUTE</span><strong id="best-time">—</strong></div><button id="clear-best" class="text-button" type="button" disabled>Clear best</button></div>
+                    <p class="timer-footnote">Edit stage budgets before starting. The clock keeps going until you pause or finish; it also survives a page reload. Faster isn’t always better—leave room for a good discussion.</p>
+                </section>
+
+                <section id="availability" class="widget" aria-labelledby="availability-title">
+                    <div class="widget-heading">
+                        <div><p class="eyebrow">03 / PLAN FOR FAILURE</p><h2 id="availability-title">Availability calculator</h2></div>
+                        <span class="widget-icon" aria-hidden="true">◎</span>
+                    </div>
+                    <p class="widget-description">Turn a few nines into a concrete downtime budget.</p>
+                    <div class="target-line">
+                        <label for="availability-input">Availability target</label>
+                        <div class="measurement-input"><input id="availability-input" type="number" min="0" max="100" step="any" required aria-describedby="availability-error"><span>%</span></div>
+                    </div>
+                    <div class="availability-presets" role="group" aria-label="Availability presets">
+                        <button type="button" data-availability="99" aria-pressed="false">99%</button><button type="button" data-availability="99.9" aria-pressed="true">99.9%</button><button type="button" data-availability="99.99" aria-pressed="false">99.99%</button><button type="button" data-availability="99.999" aria-pressed="false">99.999%</button>
+                    </div>
+                    <p id="availability-error" class="error" role="status" hidden></p>
+                    <div class="downtime-result" aria-live="polite" aria-atomic="true">
+                        <p class="eyebrow">ALLOWED DOWNTIME</p>
+                        <dl><div><dt>Per day</dt><dd id="downtime-day">—</dd></div><div><dt>Per month</dt><dd id="downtime-month">—</dd></div><div><dt>Per year</dt><dd id="downtime-year">—</dd></div></dl>
+                        <p id="error-budget"></p>
+                    </div>
+                    <p class="widget-note">Downtime = period × (1 − availability). Uses a 30-day month and 365-day year. This is a time-based budget; a request-based SLO measures the share of unsuccessful requests instead.</p>
+                    <h3 class="subheading">What makes the target credible?</h3>
+                    <div class="reliability-notes">
+                        <details><summary>Replication <span>Separate failure domains</span></summary><p>Copies help only when they do not share the same failure. Discuss zones, replication lag, quorum requirements, and the latency cost of synchronous writes.</p></details>
+                        <details><summary>Failover <span>Detection + recovery time</span></summary><p>Explain how failure is detected, who becomes the leader, and how traffic moves. Include detection delays, false positives, split brain, and degraded capacity.</p></details>
+                        <details><summary>Recovery <span>RTO + RPO</span></summary><p>RTO is how long recovery may take; RPO is how much recent data may be lost. Replication is not a backup: test restores and recovery procedures.</p></details>
+                    </div>
+                </section>
+
+                <section id="requirements" class="widget" aria-labelledby="requirements-title">
+                    <div class="widget-heading">
+                        <div><p class="eyebrow">04 / COVER THE ESSENTIALS</p><h2 id="requirements-title">Requirements checklist</h2></div>
+                        <span class="widget-icon" aria-hidden="true">✓</span>
+                    </div>
+                    <p class="widget-description">A few useful prompts for each part of the conversation.</p>
+                    <div class="widget-tools checklist-status"><strong id="requirements-count" role="status">0 of 15 covered</strong><button id="clear-requirements" class="text-button" type="button">Clear checks</button></div>
+                    <div class="progress-track"><div id="requirements-progress"></div></div>
+                    <p id="requirements-stage" class="widget-note">Follow the prompts as you move through your splits.</p>
+                    <div id="requirements-groups"></div>
+                </section>
+            </div>
+            <p id="workbench-save-error" class="error" role="status" hidden>Browser storage is unavailable. New widget settings and checklist changes last for this page visit.</p>
+        </main>
+        <footer><span>Rough numbers. Clear thinking.</span><span id="save-status">Your settings and timer stay in this browser.</span></footer>
+        <noscript><p class="error">Enable JavaScript to use the calculator and interview timer.</p></noscript>
+    </div>
+</body>
+</html>
